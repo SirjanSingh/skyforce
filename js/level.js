@@ -47,8 +47,15 @@ class Level {
                 enemiesObj.enemiesN1(440,0,0,4,4);
             }
 
+            // Fighter wave: starts later, slower spawn cadence, alternates sides.
+            if(frameC % 90 === 0 && frameC > (fc3 + 280) && eF < 8){
+                var sideX = (eF % 2 === 0) ? 90 : 410;
+                enemiesObj.enemiesFighter(sideX, -20, 0, 1.5);
+            }
+
             enemiesObj.rotateE12(0,5,1);
             enemiesObj.rotateE12(0,5,2);
+            enemiesObj.updateFighters();
 
             if(frameC % 4 === 0){
                 laserObj.createLasers();

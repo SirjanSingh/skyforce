@@ -50,3 +50,17 @@ class Laser {
 
     }
 }
+
+// Enemy lasers live as their own group; spawn helper kept at module scope
+// because the Enemies class is the only caller and we don't need an
+// EnemyLaser class to hold what amounts to one constructor + one collider.
+function spawnEnemyLaser(x, y){
+    var b = createSprite(x, y, 8, 18);
+    b.addImage(enemyBulletImg);
+    b.scale = 0.5;
+    b.velocityY = 8;
+    b.setCollider("circle", 0, 0, 6);
+    b.lifetime = height / b.velocityY + 4;
+    enemyLasersGroup.add(b);
+}
+

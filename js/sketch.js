@@ -10,7 +10,12 @@ var backButton, backButtonImg;
 var startGame, startGameImg;
 var gameState = "menu";
 var enemiesGroup, enemiesRedGroup1, enemiesRedGroup2, enemiesGroupN;
+var enemiesFighterGroup;
 var lasersGroup, laser;
+var enemyLasersGroup;
+var fighterAnim;
+var enemyBulletImg;
+var eF = 0; // fighter spawn cap (parallels e1r/e2r/e3n*)
 var bullet1Img, bullet2Img, bullet3Img;
 var explode;
 var explosionAnim;
@@ -59,6 +64,17 @@ function preload(){
 
     explode  = loadImage("assets/sprites/explode.png");
     spaceBgImg = loadImage("assets/sprites/bg/space.jpg");
+    enemyBulletImg = loadImage("assets/sprites/bullets/EnemyBulletPrysznic_L5.png");
+    fighterAnim = loadAnimation(
+        "assets/anim/fighter/Enemy-Fighter-Get0001.png",
+        "assets/anim/fighter/Enemy-Fighter-Get0002.png",
+        "assets/anim/fighter/Enemy-Fighter-Get0003.png",
+        "assets/anim/fighter/Enemy-Fighter-Get0004.png",
+        "assets/anim/fighter/Enemy-Fighter-Get0005.png",
+        "assets/anim/fighter/Enemy-Fighter-Get0006.png",
+        "assets/anim/fighter/Enemy-Fighter-Get0007.png",
+        "assets/anim/fighter/Enemy-Fighter-Get0008.png"
+    );
     explosionAnim = loadAnimation(
         "assets/anim/explosionA/1.png",  "assets/anim/explosionA/2.png",
         "assets/anim/explosionA/3.png",  "assets/anim/explosionA/4.png",
@@ -98,11 +114,13 @@ function setup(){
     plane_Selection.scale = 0.12;
     plane_Selection.visible = false;
 
-    enemiesGroup     = new Group();
-    enemiesRedGroup1 = new Group();
-    enemiesRedGroup2 = new Group();
-    enemiesGroupN    = new Group();
-    lasersGroup      = new Group();
+    enemiesGroup        = new Group();
+    enemiesRedGroup1    = new Group();
+    enemiesRedGroup2    = new Group();
+    enemiesGroupN       = new Group();
+    enemiesFighterGroup = new Group();
+    lasersGroup         = new Group();
+    enemyLasersGroup    = new Group();
 
     playerObj  = new Player();
     selectObj  = new Select_Plane();
@@ -234,9 +252,12 @@ function resetGame(){
     enemiesRedGroup1.removeSprites();
     enemiesRedGroup2.removeSprites();
     enemiesGroupN.removeSprites();
+    enemiesFighterGroup.removeSprites();
     lasersGroup.removeSprites();
+    enemyLasersGroup.removeSprites();
     e1r = 0; e2r = 0;
     e3n1 = 0; e3n2 = 0; e3n3 = 0; e3n4 = 0;
+    eF = 0;
     fc3 = frameCount;
     frameC = 0;
     gameState = "play";

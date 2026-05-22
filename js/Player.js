@@ -26,6 +26,13 @@ class Player {
                 enemiesGroupN[i].destroy();
             }
         }
+        // Enemy lasers do half a ram's damage and just disappear on hit.
+        for(var i = 0; i < enemyLasersGroup.length; i++){
+            if(player.isTouching(enemyLasersGroup[i])){
+                playerObj.health(4);
+                enemyLasersGroup[i].remove();
+            }
+        }
     }
     health(loss){
         this.healthP = this.healthP - loss;

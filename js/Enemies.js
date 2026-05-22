@@ -100,6 +100,38 @@ class Enemies {
         enemiesGroup.add(enemy); // adding the enemimes in universal groups
     }
 
+    enemiesFighter(x, y, xv, yv){
+        // Mid-tier enemy that descends slowly and periodically fires straight
+        // down. 8-frame propulsion animation is the visible difference.
+        eF++;
+        var enemy = createSprite(x, y, 50, 50);
+        enemy.addAnimation("fly", fighterAnim);
+        enemy.scale = 0.6;
+        enemy.velocityX = xv;
+        enemy.velocityY = yv;
+        enemy.lifetime  = 800;
+        enemy.points = 250;
+        enemy.hp = 2;
+        enemy.setCollider("circle", 0, 0, 30);
+        enemy._lastFire = frameCount + Math.floor(random(30, 90));
+        enemy._fireEvery = Math.floor(random(75, 110));
+        enemiesFighterGroup.add(enemy);
+        enemiesGroup.add(enemy);
+    }
+
+    updateFighters(){
+        // Each fighter checks its own cooldown. Firing always shoots straight
+        // down; we don't lead the player because the lasers travel fast and
+        // the player can dodge laterally.
+        for(var i = 0; i < enemiesFighterGroup.length; i++){
+            var f = enemiesFighterGroup.get(i);
+            if(f.y > 0 && f.y < height - 80 && frameCount - f._lastFire > f._fireEvery){
+                spawnEnemyLaser(f.x, f.y + 30);
+                f._lastFire = frameCount;
+            }
+        }
+    }
+
     rotateE12(x,y,q){//to rotate the enemy plane when it comes at a paticular point in 2 frames....in first 
         //it will be straight then it  will turn half then completly and then goo straight
         var e = q; // just did it
