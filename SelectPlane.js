@@ -1,291 +1,85 @@
+// 9 plane-picker tiles laid out in a 3-column x 3-row grid. The previous
+// version expanded this into 9 named globals (planeMenu1..planeMenu9)
+// and re-stated every scale assignment inside every branch of every
+// handler (~290 lines for what is one 3x3 grid). Now: one planeMenus[]
+// array, three small loops.
+
+// Index by 1..9; slot 0 unused so planeNumber maps directly.
+var planeMenus = [null, null, null, null, null, null, null, null, null, null];
+
 class Select_Plane {
     constructor(){
 
     }
+
+    _planeImages(){
+        // Returned lazily — these globals are populated by preload().
+        return [null, plane1, plane2, plane3, plane4, plane5,
+                      plane6, plane7, plane8, plane9];
+    }
+
+    _highlight(selected){
+        for(var i = 1; i <= 9; i++){
+            planeMenus[i].scale = (i === selected) ? 0.75 : 0.6;
+        }
+    }
+
     displayPlane(){
-        gameState = "selectPlane"
+        gameState = "selectPlane";
         main_Screen.visible = false;
         selectPlaneMenu.visible = true;
-        selectPlaneMenu.addImage(plane_SelectionMenuImg)
+        selectPlaneMenu.addImage(plane_SelectionMenuImg);
         selectPlaneMenu.scale = 0.45;
 
         plane_Selection.destroy();
-        
-        //creating back navigation button
-        backButton = createSprite(67,displayHeight-65);
+
+        // back-nav button
+        backButton = createSprite(67, displayHeight - 65);
         backButton.addImage("back", backButtonImg);
         backButton.visible = true;
-        backButton.scale = 0.8
+        backButton.scale = 0.8;
 
-
-        
-        planeMenu1 = createSprite(65,150,50,50);
-        planeMenu2 = createSprite(250,150,50,50);
-        planeMenu3 = createSprite(435,150,50,50);
-
-        planeMenu4 = createSprite(65,350,50,50);
-        planeMenu5 = createSprite(250,350,50,50);
-        planeMenu6 = createSprite(435,350,50,50);
-
-        planeMenu7 = createSprite(65,550,50,50);
-        planeMenu8 = createSprite(250,550,50,50);
-        planeMenu9 = createSprite(435,550,50,50);
-
-        planeMenu1.addImage(plane1);
-        planeMenu2.addImage(plane2);
-        planeMenu3.addImage(plane3);
-        planeMenu4.addImage(plane4);
-        planeMenu5.addImage(plane5);
-        planeMenu6.addImage(plane6);
-        planeMenu7.addImage(plane7);
-        planeMenu8.addImage(plane8);
-        planeMenu9.addImage(plane9);
-
-        planeMenu1.scale = 0.6;
-        planeMenu2.scale = 0.6;
-        planeMenu3.scale = 0.6;
-        planeMenu4.scale = 0.6;
-        planeMenu5.scale = 0.6;
-        planeMenu6.scale = 0.6;
-        planeMenu7.scale = 0.6;
-        planeMenu8.scale = 0.6;
-        planeMenu9.scale = 0.6; 
-        
-
+        var cols = [65, 250, 435];
+        var rows = [150, 350, 550];
+        var images = this._planeImages();
+        for(var i = 1; i <= 9; i++){
+            var col = (i - 1) % 3;
+            var row = Math.floor((i - 1) / 3);
+            var s = createSprite(cols[col], rows[row], 50, 50);
+            s.addImage(images[i]);
+            s.scale = 0.6;
+            planeMenus[i] = s;
+            // back-compat globals so any external code still resolves them
+            window["planeMenu" + i] = s;
+        }
     }
 
     selectPlane(){
-        if((mousePressedOver(planeMenu1) && gameState === "selectPlane") ){
-            planeNumber = 1
-            planeMenu1.scale = 0.75;
-            planeMenu2.scale = 0.6;
-            planeMenu3.scale = 0.6;
-            planeMenu4.scale = 0.6;
-            planeMenu5.scale = 0.6;
-            planeMenu6.scale = 0.6;
-            planeMenu7.scale = 0.6;
-            planeMenu8.scale = 0.6;
-            planeMenu9.scale = 0.6; 
+        if(gameState !== "selectPlane") return;
+        for(var i = 1; i <= 9; i++){
+            if(mousePressedOver(planeMenus[i])){
+                planeNumber = i;
+                this._highlight(i);
+                return;
             }
-        else if((mousePressedOver(planeMenu2) && gameState === "selectPlane") ){
-            planeNumber = 2;
-            planeMenu1.scale = 0.6;
-            planeMenu2.scale = 0.75;
-            planeMenu3.scale = 0.6;
-            planeMenu4.scale = 0.6;
-            planeMenu5.scale = 0.6;
-            planeMenu6.scale = 0.6;
-            planeMenu7.scale = 0.6;
-            planeMenu8.scale = 0.6;
-            planeMenu9.scale = 0.6; 
         }
-        else if((mousePressedOver(planeMenu3) && gameState === "selectPlane") ){
-            planeNumber = 3;
-            planeMenu1.scale = 0.6;
-            planeMenu2.scale = 0.6;
-            planeMenu3.scale = 0.75;
-            planeMenu4.scale = 0.6;
-            planeMenu5.scale = 0.6;
-            planeMenu6.scale = 0.6;
-            planeMenu7.scale = 0.6;
-            planeMenu8.scale = 0.6;
-            planeMenu9.scale = 0.6; 
-                }
-        else if((mousePressedOver(planeMenu4) && gameState === "selectPlane") ){
-            planeNumber = 4;
-            planeMenu1.scale = 0.6;
-            planeMenu2.scale = 0.6;
-            planeMenu3.scale = 0.6;
-            planeMenu4.scale = 0.75;
-            planeMenu5.scale = 0.6;
-            planeMenu6.scale = 0.6;
-            planeMenu7.scale = 0.6;
-            planeMenu8.scale = 0.6;
-            planeMenu9.scale = 0.6; 
-                }
-        else if((mousePressedOver(planeMenu5) && gameState === "selectPlane") ){
-            planeNumber = 5;
-            planeMenu1.scale = 0.6;
-            planeMenu2.scale = 0.6;
-            planeMenu3.scale = 0.6;
-            planeMenu4.scale = 0.6;
-            planeMenu5.scale = 0.75;
-            planeMenu6.scale = 0.6;
-            planeMenu7.scale = 0.6;
-            planeMenu8.scale = 0.6;
-            planeMenu9.scale = 0.6; 
-                }
-        else if((mousePressedOver(planeMenu6) && gameState === "selectPlane")){
-            planeNumber = 6;
-            planeMenu1.scale = 0.6;
-            planeMenu2.scale = 0.6;
-            planeMenu3.scale = 0.6;
-            planeMenu4.scale = 0.6;
-            planeMenu5.scale = 0.6;
-            planeMenu6.scale = 0.75;
-            planeMenu7.scale = 0.6;
-            planeMenu8.scale = 0.6;
-            planeMenu9.scale = 0.6; 
-
-          //  planeMenu6.destroy();
-           // planeMenu6.visible = false;
-                }
-        else if((mousePressedOver(planeMenu7) && gameState === "selectPlane") ){
-            planeNumber = 7;
-            planeMenu1.scale = 0.6;
-            planeMenu2.scale = 0.6;
-            planeMenu3.scale = 0.6;
-            planeMenu4.scale = 0.6;
-            planeMenu5.scale = 0.6;
-            planeMenu6.scale = 0.6;
-            planeMenu7.scale = 0.75;
-            planeMenu8.scale = 0.6;
-            planeMenu9.scale = 0.6; 
-                }
-        else if((mousePressedOver(planeMenu8) && gameState === "selectPlane")){
-            planeNumber = 8;
-            planeMenu1.scale = 0.6;
-            planeMenu2.scale = 0.6;
-            planeMenu3.scale = 0.6;
-            planeMenu4.scale = 0.6;
-            planeMenu5.scale = 0.6;
-            planeMenu6.scale = 0.6;
-            planeMenu7.scale = 0.6;
-            planeMenu8.scale = 0.75;
-            planeMenu9.scale = 0.6; 
-                }
-        else if((mousePressedOver(planeMenu9) && gameState === "selectPlane") ){
-            planeNumber = 9;
-            planeMenu1.scale = 0.6;
-            planeMenu2.scale = 0.6;
-            planeMenu3.scale = 0.6;
-            planeMenu4.scale = 0.6;
-            planeMenu5.scale = 0.6;
-            planeMenu6.scale = 0.6;
-            planeMenu7.scale = 0.6;
-            planeMenu8.scale = 0.6;
-            planeMenu9.scale = 0.75; 
-                }
-        
-       }
-
-       selectPlaneOther(){
-        if( planeNumber === 1){
-            planeMenu1.scale = 0.75;
-            planeMenu2.scale = 0.6;
-            planeMenu3.scale = 0.6;
-            planeMenu4.scale = 0.6;
-            planeMenu5.scale = 0.6;
-            planeMenu6.scale = 0.6;
-            planeMenu7.scale = 0.6;
-            planeMenu8.scale = 0.6;
-            planeMenu9.scale = 0.6; 
-            }
-        else if((planeNumber === 2)){
-            planeMenu1.scale = 0.6;
-            planeMenu2.scale = 0.75;
-            planeMenu3.scale = 0.6;
-            planeMenu4.scale = 0.6;
-            planeMenu5.scale = 0.6;
-            planeMenu6.scale = 0.6;
-            planeMenu7.scale = 0.6;
-            planeMenu8.scale = 0.6;
-            planeMenu9.scale = 0.6; 
-        }
-        else if( (planeNumber === 3)){
-            planeMenu1.scale = 0.6;
-            planeMenu2.scale = 0.6;
-            planeMenu3.scale = 0.75;
-            planeMenu4.scale = 0.6;
-            planeMenu5.scale = 0.6;
-            planeMenu6.scale = 0.6;
-            planeMenu7.scale = 0.6;
-            planeMenu8.scale = 0.6;
-            planeMenu9.scale = 0.6; 
-                }
-        else if((planeNumber === 4)){
-            planeMenu1.scale = 0.6;
-            planeMenu2.scale = 0.6;
-            planeMenu3.scale = 0.6;
-            planeMenu4.scale = 0.75;
-            planeMenu5.scale = 0.6;
-            planeMenu6.scale = 0.6;
-            planeMenu7.scale = 0.6;
-            planeMenu8.scale = 0.6;
-            planeMenu9.scale = 0.6; 
-                }
-        else if( (planeNumber === 5)){
-            planeMenu1.scale = 0.6;
-            planeMenu2.scale = 0.6;
-            planeMenu3.scale = 0.6;
-            planeMenu4.scale = 0.6;
-            planeMenu5.scale = 0.75;
-            planeMenu6.scale = 0.6;
-            planeMenu7.scale = 0.6;
-            planeMenu8.scale = 0.6;
-            planeMenu9.scale = 0.6; 
-                }
-        else if((planeNumber === 6)){
-            planeMenu1.scale = 0.6;
-            planeMenu2.scale = 0.6;
-            planeMenu3.scale = 0.6;
-            planeMenu4.scale = 0.6;
-            planeMenu5.scale = 0.6;
-            planeMenu6.scale = 0.75;
-            planeMenu7.scale = 0.6;
-            planeMenu8.scale = 0.6;
-            planeMenu9.scale = 0.6; 
-
-          //  planeMenu6.destroy();
-           // planeMenu6.visible = false;
-                }
-        else if((planeNumber === 7)){
-            planeMenu1.scale = 0.6;
-            planeMenu2.scale = 0.6;
-            planeMenu3.scale = 0.6;
-            planeMenu4.scale = 0.6;
-            planeMenu5.scale = 0.6;
-            planeMenu6.scale = 0.6;
-            planeMenu7.scale = 0.75;
-            planeMenu8.scale = 0.6;
-            planeMenu9.scale = 0.6; 
-                }
-        else if((planeNumber === 8)){
-            planeMenu1.scale = 0.6;
-            planeMenu2.scale = 0.6;
-            planeMenu3.scale = 0.6;
-            planeMenu4.scale = 0.6;
-            planeMenu5.scale = 0.6;
-            planeMenu6.scale = 0.6;
-            planeMenu7.scale = 0.6;
-            planeMenu8.scale = 0.75;
-            planeMenu9.scale = 0.6; 
-                }
-        else if((planeNumber === 9)){
-            planeMenu1.scale = 0.6;
-            planeMenu2.scale = 0.6;
-            planeMenu3.scale = 0.6;
-            planeMenu4.scale = 0.6;
-            planeMenu5.scale = 0.6;
-            planeMenu6.scale = 0.6;
-            planeMenu7.scale = 0.6;
-            planeMenu8.scale = 0.6;
-            planeMenu9.scale = 0.75; 
-                }
-           
-       }
-
-       destroyP(){
-        planeMenu1.destroy();
-        planeMenu2.destroy();
-        planeMenu3.destroy();
-        planeMenu4.destroy();
-        planeMenu5.destroy();
-        planeMenu6.destroy();
-        planeMenu7.destroy();
-        planeMenu8.destroy();
-        planeMenu9.destroy();
     }
+
+    selectPlaneOther(){
+        if(!planeNumber || planeNumber < 1 || planeNumber > 9) return;
+        if(!planeMenus[planeNumber]) return;
+        this._highlight(planeNumber);
+    }
+
+    destroyP(){
+        for(var i = 1; i <= 9; i++){
+            if(planeMenus[i]){
+                planeMenus[i].destroy();
+                planeMenus[i] = null;
+            }
+        }
+    }
+
     display(){
 
     }
