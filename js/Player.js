@@ -29,6 +29,8 @@ class Player {
     }
     health(loss){
         this.healthP = this.healthP - loss;
+        triggerShake(10, 6); // every hit shakes; bigger hits could pass larger mag
+
         // Bug fix: previous code read this.health (undefined) and assigned
         // to it, which (a) never tripped the <=0 branch and (b) shadowed
         // the health() method itself with the number 0 — so the second

@@ -13,6 +13,11 @@ var enemiesGroup, enemiesRedGroup1, enemiesRedGroup2, enemiesGroupN;
 var lasersGroup, laser;
 var bullet1Img, bullet2Img, bullet3Img;
 var explode;
+var explosionAnim;
+var spaceBgImg;
+var bgScrollY = 0;
+var shakeFrames = 0;
+var shakeMag = 0;
 var newAnime, enemy;
 var score = 0;
 var level = 0;
@@ -53,6 +58,18 @@ function preload(){
     bullet3Img = loadImage("assets/sprites/bullets/fx_shotNEW_x3.png");
 
     explode  = loadImage("assets/sprites/explode.png");
+    spaceBgImg = loadImage("assets/sprites/bg/space.jpg");
+    explosionAnim = loadAnimation(
+        "assets/anim/explosionA/1.png",  "assets/anim/explosionA/2.png",
+        "assets/anim/explosionA/3.png",  "assets/anim/explosionA/4.png",
+        "assets/anim/explosionA/5.png",  "assets/anim/explosionA/6.png",
+        "assets/anim/explosionA/7.png",  "assets/anim/explosionA/8.png",
+        "assets/anim/explosionA/9.png",  "assets/anim/explosionA/10.png",
+        "assets/anim/explosionA/11.png", "assets/anim/explosionA/12.png",
+        "assets/anim/explosionA/13.png", "assets/anim/explosionA/14.png",
+        "assets/anim/explosionA/15.png", "assets/anim/explosionA/16.png",
+        "assets/anim/explosionA/17.png"
+    );
     newAnime = loadAnimation(
         "assets/anim/hero/hero1.png",
         "assets/anim/hero/hero2.png",
@@ -114,6 +131,21 @@ function setup(){
 function draw(){
     background("black");
     frameC += 1;
+
+    // Scrolling space background only while actually flying (menu /
+    // plane-select keep the painted main_Screen sprite art).
+    if(gameState === "play" || gameState === "over"){
+        drawScrollingBg();
+    }
+
+    // Screen shake applies to everything *after* this push so the HUD
+    // text and game-over overlay shake with the sprites.
+    push();
+    if(shakeFrames > 0){
+        translate(random(-shakeMag, shakeMag), random(-shakeMag, shakeMag));
+        shakeFrames--;
+    }
+
     gameObj.start();
 
     if(gameState !== "over"){
@@ -124,11 +156,52 @@ function draw(){
     }
 
     drawSprites();
-    text("Score: " + score, 250, 20);
+    drawHud();
 
     if(gameState === "over"){
         drawGameOver();
     }
+    pop();
+}
+
+function drawScrollingBg(){
+    // Tile the bg image vertically and scroll. imageMode CORNER (default)
+    // means (x,y) is the top-left of the image.
+    var iw = spaceBgImg.width;
+    var ih = spaceBgImg.height;
+    var scale = width / iw;
+    var drawW = width;
+    var drawH = ih * scale;
+    bgScrollY = (bgScrollY + 1.5) % drawH;
+    var y = bgScrollY - drawH;
+    while(y < height){
+        image(spaceBgImg, 0, y, drawW, drawH);
+        y += drawH;
+    }
+}
+
+function drawHud(){
+    if(gameState !== "play" && gameState !== "over") return;
+    fill("white");
+    noStroke();
+    textSize(18);
+    textAlign(LEFT, BASELINE);
+    text("HP: " + playerObj.healthP, 14, 24);
+    textAlign(CENTER, BASELINE);
+    text("Score: " + score, width/2, 24);
+    textAlign(RIGHT, BASELINE);
+    textSize(12);
+    text("FPS: " + Math.round(frameRate()), width - 14, 24);
+    textAlign(LEFT, BASELINE);
+}
+
+// Called whenever the player gets hit, so the damage carries weight.
+// dur = frames, mag = pixels of jitter per axis.
+function triggerShake(dur, mag){
+    if(dur > shakeFrames) shakeFrames = dur;
+    if(mag > shakeMag)    shakeMag = mag;
+    // mag decays automatically once shakeFrames hits 0 -- reset there too.
+    if(shakeFrames === 0) shakeMag = 0;
 }
 
 function drawGameOver(){

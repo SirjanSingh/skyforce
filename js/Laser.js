@@ -16,10 +16,15 @@ class Laser {
     }
 
     spawnExplosion(x, y){
+        // 17-frame animation, p5.play advances at frameDelay=4, so the
+        // anim takes ~68 game frames end-to-end. We clone the animation
+        // so each explosion runs independently, set it non-looping, and
+        // let lifetime cull the sprite after the anim has played out.
         var ex = createSprite(x, y, 50, 50);
-        ex.addImage(explode);
-        ex.scale = 0.3;
-        ex.lifetime = 5;
+        ex.addAnimation("boom", explosionAnim);
+        ex.animation.looping = false;
+        ex.scale = 0.6;
+        ex.lifetime = 68;
     }
 
     collision(){

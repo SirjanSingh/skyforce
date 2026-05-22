@@ -24,11 +24,8 @@ class Level {
             player.addAnimation("simple", animMap[planeNumber] || plane1);
             player._planeNumber = planeNumber;
         }
-            textSize(20)
-            text("FPS:"+Math.round(frameRate()),400,25)
-            text("HP:"+playerObj.healthP,20,25)
 
-            playerObj.checkCollision();
+        playerObj.checkCollision();
 
             if(frameC % 15 === 0/*the rate of enemy production*/ && frameC > (fc3+75)/* the time after which the enemy will  be produced*/ && e1r < 5/*limiting the number of enemy produced to 5*/){
                 enemiesObj.enemiesRed1(0,120,5,0)   // creaing  the enemes set of 5
