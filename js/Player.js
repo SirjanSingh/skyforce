@@ -29,10 +29,14 @@ class Player {
 
     }
     health(loss){
-        this.healthP =this.healthP - loss;
-        if( this.health <=0 ){
-            this.health = 0
-            //gameState = "over";
+        this.healthP = this.healthP - loss;
+        // Bug fix: previous code read this.health (undefined) and assigned
+        // to it, which (a) never tripped the <=0 branch and (b) shadowed
+        // the health() method itself with the number 0 — so the second
+        // collision threw "playerObj.health is not a function".
+        if(this.healthP <= 0){
+            this.healthP = 0;
+            gameState = "over";
         }
         return this.healthP;
     }

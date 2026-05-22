@@ -212,25 +212,57 @@ sirjan.rotation = r
 pop();*/
 //console.log(sirjan)
 gameObj.start();
-//console.log(gameState);
-//console.log(frameCount-fc3);
 
-if(frameCount > (fc3+10)){
-    //console.log("ouch")
-    //e2r = 0;
-//console.log(playerObj.health(0))
+if(gameState !== "over"){
+    player.x = mouseX;
+    player.y = mouseY;
+    player1.x = mouseX;
+    player1.y = mouseY;
 }
-//console.log(playerObj.health(0))
-//console.log(enemiesGroup.length)
-player.x = mouseX;
-player.y = mouseY;
-player1.x = mouseX;
-player1.y = mouseY;
-//console.log(mouseX +":"+mouseY );
-
 
 drawSprites();
-text("Score: "+score,250,20)
+text("Score: "+score,250,20);
+
+if(gameState === "over"){
+    drawGameOver();
+}
+}
+
+function drawGameOver(){
+    push();
+    fill(0, 0, 0, 180);
+    noStroke();
+    rect(0, 0, width, height);
+    fill("white");
+    textAlign(CENTER, CENTER);
+    textSize(48);
+    text("GAME OVER", width/2, height/2 - 40);
+    textSize(20);
+    text("Final score: " + score, width/2, height/2 + 10);
+    text("Press R to restart", width/2, height/2 + 40);
+    pop();
+    textAlign(LEFT, BASELINE);
+}
+
+function keyPressed(){
+    if(gameState === "over" && (key === 'r' || key === 'R')){
+        resetGame();
+    }
+}
+
+function resetGame(){
+    score = 0;
+    playerObj.healthP = 100;
+    enemiesGroup.removeSprites();
+    enemiesRedGroup1.removeSprites();
+    enemiesRedGroup2.removeSprites();
+    enemiesGroupN.removeSprites();
+    lasersGroup.removeSprites();
+    e1r = 0; e2r = 0;
+    e3n1 = 0; e3n2 = 0; e3n3 = 0; e3n4 = 0;
+    fc3 = frameCount;
+    frameC = 0;
+    gameState = "play";
 }
 
 /*

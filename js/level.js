@@ -49,6 +49,7 @@ class Level {
             }
             textSize(20)
             text("FPS:"+Math.round(frameRate()),400,25)
+            text("HP:"+playerObj.healthP,20,25)
 
             playerObj.checkCollision();
 
