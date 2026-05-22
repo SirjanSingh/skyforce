@@ -253,6 +253,7 @@ function keyPressed(){
 function resetGame(){
     score = 0;
     playerObj.healthP = 100;
+    player._planeNumber = undefined;
     enemiesGroup.removeSprites();
     enemiesRedGroup1.removeSprites();
     enemiesRedGroup2.removeSprites();

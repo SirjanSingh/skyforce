@@ -11,42 +11,19 @@ class Level {
 
         //adding image to the player acc to the choice of user
         main_Screen.visible = false;
-            
-            switch(planeNumber){
-                case 1:
-                    player.addAnimation("simple",plane1);
-                    break;
-                case 2:
-                    player.addAnimation("simple",plane1);
-                    break; 
-                case 3:
-                    player.addAnimation("simple",plane3);
-                    break; 
-                case 4:
-                    player.addAnimation("simple",plane4);
-                    break; 
-                case 5:
-                    player.addAnimation("simple",plane5);
-                    break; 
-                case 6:
-                    player.addAnimation("simple",plane6);
-                    break; 
-                case 7:
-                    player.addAnimation("simple",plane7);
-                    break; 
-                case 8:
-                    player.addAnimation("simple",plane8);
-                    break; 
-                case 9:
-                    player.addAnimation("simple",plane9);
-                    break; 
-                default:
-                    //console.log("shit");
-                    /*player1.visible = true;
-                    player1.scale = 0.35*/
-                    player.addAnimation("simple",plane1);
-                    break;
-            }
+
+        // Bind the chosen plane's animation once per selection. The old
+        // code called player.addAnimation() every frame, which appended a
+        // new label each tick and ballooned the sprite's animation map.
+        // case 2 also wrongly mapped to plane1 — fixed to plane2.
+        if(player._planeNumber !== planeNumber){
+            var animMap = {
+                1: plane1, 2: plane2, 3: plane3, 4: plane4, 5: plane5,
+                6: plane6, 7: plane7, 8: plane8, 9: plane9
+            };
+            player.addAnimation("simple", animMap[planeNumber] || plane1);
+            player._planeNumber = planeNumber;
+        }
             textSize(20)
             text("FPS:"+Math.round(frameRate()),400,25)
             text("HP:"+playerObj.healthP,20,25)

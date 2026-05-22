@@ -35,7 +35,11 @@ class Enemies {
                     enemy.setCollider("circle",0,0,35); 
             }
           
-            enemy.lifetime = displayHeight/(yv-1); //more lifetime bcoz I not  want it to vanish earlier
+            // Guard against divide-by-zero / negative lifetimes when yv <= 1.
+            // Lifetime is "frames to travel one display height at vertical
+            // velocity yv", so we need yv > 0 to make any sense.
+            var safeYv = Math.max(yv, 1);
+            enemy.lifetime = displayHeight / safeYv;
             enemy.points = 100;
             enemiesGroup.add(enemy);//adding the enemies to the Group
     }
