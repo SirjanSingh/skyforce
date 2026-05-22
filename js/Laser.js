@@ -17,8 +17,6 @@ class Laser {
       lasersGroup.add(laser) ;
       lasers.push(laser)
       laserSound.play();
-      //frameRate(144)
-
   }
 
     collision(){

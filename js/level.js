@@ -50,11 +50,6 @@ class Level {
             textSize(20)
             text("FPS:"+Math.round(frameRate()),400,25)
 
-            //frameRate(144)
-            /*if(frameRate()< 50){
-                frameRate(144)
-            }*/
-            //console.log(frameRate())
             scoreObj.score1();
             playerObj.checkCollision();
 

@@ -200,12 +200,11 @@ player1.addAnimation("animation",newAnime);
 //sirjan = createSprite(250,250,100,100);
 
 
-frameRate(144)
+frameRate(60);
 }
 
 function draw(){
 background("black");
-frameRate(48)
 frameC += 1;
 
 //back.position(0,0)
