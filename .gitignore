@@ -1,0 +1,12 @@
+# Editor / tooling
+.vscode/
+.claude/
+
+# Google Drive sync leftover (see FIXES.md #11)
+.tmp.drivedownload/
+.tmp*/
+
+# OS junk
+Thumbs.db
+.DS_Store
+desktop.ini
