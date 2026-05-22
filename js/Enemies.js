@@ -57,7 +57,6 @@ class Enemies {
     enemiesRed2(x,y,xv,yv){//here also every thing same just E1 TO E2
         e2r++;
         e2rex = 1;
-        ne[0]++;
         var enemy = createSprite(x,y,50,50);
         enemy.addImage(enemyRed2Img);
         enemy.velocityX = xv;
@@ -69,7 +68,6 @@ class Enemies {
     }
 
     enemiesN1(x,y,xv,yv,t){// HERE ALSO SAME
-        ne[0]++;
         e3nex =1;
         var enemy = createSprite(x,y,50,50);
         enemy.addImage(enemyNImg);

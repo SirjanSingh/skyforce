@@ -21,8 +21,7 @@ var enemiesObj;
 var enemiesGroup;
 var enemiesRedGroup1,enemiesRedGroup2,enemiesGroupN;
 var lasersGroup ,laser ;
-var lcv = 0;
-var bulletImg , bullet; 
+var bulletImg , bullet;
 var explosion_1;
 var explosion_2;
 var explode;
@@ -37,9 +36,6 @@ var e1rex;
 var e2rex= 0;
 var e3n1 = 0,e3n2 = 0,e3n3 = 0, e3n4 = 0;
 var e3nex;
-var lasers = [];
-var enemies = [];
-var ne = [0,0,0];
 var newAnime,
     enemy;
 var back1 ,back2,back3 ,back4,back5 ,back6,back7 ,back8,back9 ,back10,back11 ,back12,back13 ,back14,back15 ,back16,back17 ,back18,back19 ,back20,back21 ,back22,back23 ,back24,back25 ,back26,back27 ,back28,back29 ,back30,back31 ,back32,back33 ,back33,back34 ,back35,back36;
@@ -47,7 +43,6 @@ var back1 ,back2,back3 ,back4,back5 ,back6,back7 ,back8,back9 ,back10,back11 ,ba
 var back,backSprite;
 var sirjan,r = 0,
     enemyTank ;
-    var et = 0,ett = 0;
 var score = 0,scoreObj;
 var EnemyDes ;
 var bullet1Img,bullet2Img,bullet3Img,
@@ -232,8 +227,6 @@ player.y = mouseY;
 player1.x = mouseX;
 player1.y = mouseY;
 //console.log(mouseX +":"+mouseY );
-//console.log(score,ne[0])
-//console.log(enemies)
 
 
 drawSprites();
