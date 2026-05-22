@@ -36,6 +36,7 @@ class Enemies {
             }
           
             enemy.lifetime = displayHeight/(yv-1); //more lifetime bcoz I not  want it to vanish earlier
+            enemy.points = 100;
             enemiesGroup.add(enemy);//adding the enemies to the Group
     }
     //xv stands for Xvelocity and think further(yv for Yvelocity)
@@ -49,8 +50,8 @@ class Enemies {
         enemy.velocityY = yv;//given the velocity
         enemy.lifetime  = 500;// giving lifetime
         enemiesGroup.add(enemy);// adding enemies into global group
+        enemy.points = 150;
         enemiesRedGroup1.add(enemy);// adding enemies into  personel group
-        enemies.push(enemy)//adding them in the enemy array
     }
 
     enemiesRed2(x,y,xv,yv){//here also every thing same just E1 TO E2
@@ -63,8 +64,8 @@ class Enemies {
         enemy.velocityY = yv;
         enemy.lifetime  = 500;
         enemiesGroup.add(enemy); 
+        enemy.points = 150;
         enemiesRedGroup2.add(enemy);
-        enemies.push(enemy)
     }
 
     enemiesN1(x,y,xv,yv,t){// HERE ALSO SAME
@@ -93,8 +94,8 @@ class Enemies {
         }
         enemiesGroupN.add(enemy)// adding the enemimes in individual groups
 
+        enemy.points = 200;
         enemiesGroup.add(enemy); // adding the enemimes in universal groups
-        enemies.push(enemy)// adding the enemimes in universal array
     }
 
     rotateE12(x,y,q){//to rotate the enemy plane when it comes at a paticular point in 2 frames....in first 

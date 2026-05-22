@@ -50,7 +50,6 @@ class Level {
             textSize(20)
             text("FPS:"+Math.round(frameRate()),400,25)
 
-            scoreObj.score1();
             playerObj.checkCollision();
 
             if(frameC % 15 === 0/*the rate of enemy production*/ && frameC > (fc3+75)/* the time after which the enemy will  be produced*/ && e1r < 5/*limiting the number of enemy produced to 5*/){
