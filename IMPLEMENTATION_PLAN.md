@@ -177,3 +177,78 @@ Optional polish once the single collision system is stable.
 (ram fix) → 5 (cheap correctness) → 6 (refactor once correct) → 7 (cleanup) →
 8 (bonus). Phase 0 first so frame timing is fixed while everything else changes.
 Each phase ends with the game runnable, so any phase can be a stopping point.
+
+---
+
+# Part II — game revamp (phases 9+)
+
+After Phase 8 the codebase is *correct* but the game is still a single
+endless wave with no real progression. The next phases turn it into an
+actual playable game using the already-bundled-but-unused assets in
+`Basic/` (animated enemy fighter, shield/speed/coin power-ups, rocks,
+space-shooter background) and `images/explosionA` (17-frame explosion
+animation that was preloaded but never displayed).
+
+## Phase 9 — Folder reorganization
+
+- Move third-party libs (`p5.*`, `matter.js`, `myOwnLibrary.js`) into `lib/`
+- Move all game classes (`SelectPlane.js` + everything in `js/`) into a
+  unified `js/` tree
+- Move sprites/sounds into `assets/sprites/`, `assets/sounds/`,
+  `assets/anim/`
+- Update `index.html` script paths
+- Delete obvious cruft (`.tmp.drivedownload`, broken `.rar` / `.zip`,
+  copies-of-copies, stray jpgs at root)
+
+## Phase 10 — Scrolling space background + screen shake + better explosions
+
+- Use `Basic/Space-Shooter-Background.jpg` as a vertically-scrolling
+  background instead of solid black
+- Wire up the preloaded `explosionA` 17-frame animation as the kill VFX
+  (replaces the static `EXPLODE.png`)
+- Add a global screen-shake helper triggered when the player takes damage
+
+## Phase 11 — Animated enemies + enemies that shoot back
+
+- Use `Basic/Enemu-FighterJet/Enemy-Fighterget/` (8-frame loop) for a new
+  "fighter" enemy variant that fires periodic projectiles at the player
+- New `EnemyLaser` sprite group; player-vs-enemyLaser overlap deducts HP
+- Existing red/red2/N variants kept; fighter is the new mid-difficulty
+  threat
+
+## Phase 12 — Power-ups
+
+- New `PowerUp` class with four types backed by existing animations:
+  - **shield** (`Basic/Shield-PowerUps/`) — temporary invulnerability
+  - **rapidfire** (`Basic/Speed-Booster/`) — halves laser cooldown
+  - **heal** — restores 25 HP (uses coin sprite)
+  - **score-multiplier** — 2x score for a window
+- Drop chance on enemy death (small for fry, higher for big N + boss)
+- Pickup collision with player; HUD shows active timers
+
+## Phase 13 — Level system
+
+- `LEVELS` data table: per-level duration, spawn-wave config, boss flag,
+  background tint
+- Three levels with distinct enemy mixes:
+  - L1: red/red2 fry + occasional fighter
+  - L2: heavier fighter waves + N formations
+  - L3: mixed chaos leading into the boss
+- "Level N" banner on start, "Level complete!" banner on finish
+- HUD shows current level
+
+## Phase 14 — Boss
+
+- `Boss` class with multi-phase HP bar, side-to-side movement, bullet
+  patterns
+- Spawns at the end of level 3 (or each level — pick one); win condition
+  on boss kill
+
+## Phase 15 — Polish & shipping
+
+- Pause (P key)
+- High-score persistence via `localStorage`
+- README rewrite (controls, levels, screenshots if I drop any)
+- SFX hooks (synthesize beeps with p5.sound oscillators since only
+  `laserShoot.mp3` ships with the repo)
+- Final balance pass
