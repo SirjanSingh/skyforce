@@ -46,8 +46,6 @@ class Enemies {
     //xv stands for Xvelocity and think further(yv for Yvelocity)
     enemiesRed1(x,y,xv,yv){
         e1r++;//enemy for first round wirh red coluor(e1r ( e--> enemy), ( 1--> first round) , ( r --> red))
-        e1rex = 1;// ex stands for existance  means for chexking if the planes r existing or not
-        ne[0]++;// idk why, but some counter
         var enemy = createSprite(x,y,50,50);//created sprite
         enemy.addImage(enemyRedImg);//added image for enemy
         enemy.velocityX = xv;// given the velocity
@@ -60,7 +58,6 @@ class Enemies {
 
     enemiesRed2(x,y,xv,yv){//here also every thing same just E1 TO E2
         e2r++;
-        e2rex = 1;
         var enemy = createSprite(x,y,50,50);
         enemy.addImage(enemyRed2Img);
         enemy.velocityX = xv;
@@ -72,7 +69,6 @@ class Enemies {
     }
 
     enemiesN1(x,y,xv,yv,t){// HERE ALSO SAME
-        e3nex =1;
         var enemy = createSprite(x,y,50,50);
         enemy.addImage(enemyNImg);
         enemy.scale = 0.4;

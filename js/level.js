@@ -49,24 +49,14 @@ class Level {
             if(frameC % 25 === 0 && frameC > (fc3 + 500) && e3n4 < 8){
                 enemiesObj.enemiesN1(440,0,0,4,4);
             }
-            
-                
-    /*
-            if(frameCount % 25 === 0){
-                enemiesObj.createEnemies(random(50,450),0,0,5);
-
-            }*/
-            //rotated the enemies
 
             enemiesObj.rotateE12(0,5,1);
             enemiesObj.rotateE12(0,5,2);
-            //rate of bullet firing
+
             if(frameC % 4 === 0){
-            laserObj.createLasers();
+                laserObj.createLasers();
             }
-            
-        laserObj.collision();
-           //console.log(lasersGroup.length)
+            laserObj.collision();
         }
     display(){
 
