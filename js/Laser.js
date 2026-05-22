@@ -40,6 +40,7 @@ class Laser {
             enemySprite.hp = (enemySprite.hp || 1) - 1;
             if(enemySprite.hp <= 0){
                 self.spawnExplosion(enemySprite.x, enemySprite.y);
+                playBoomSfx();
                 score += (enemySprite.points || 100);
                 // Big enemies (N formation / fighters / boss) have a much
                 // higher drop rate. Heuristic: points >= 200.

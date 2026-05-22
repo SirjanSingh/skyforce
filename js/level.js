@@ -154,6 +154,7 @@ class Level {
     complete(){
         if(this.current >= LEVELS.length - 1){
             gameState = "victory";
+            maybeRecordHighScore();
             this.showBanner("VICTORY!", 600);
         } else {
             this.showBanner("Level " + this.current + " complete!", 90);

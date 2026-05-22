@@ -52,6 +52,7 @@ class Player {
         }
         this.healthP = this.healthP - loss;
         triggerShake(10, 6);
+        playHitSfx();
 
         // Bug fix: previous code read this.health (undefined) and assigned
         // to it, which (a) never tripped the <=0 branch and (b) shadowed
@@ -60,6 +61,7 @@ class Player {
         if(this.healthP <= 0){
             this.healthP = 0;
             gameState = "over";
+            maybeRecordHighScore();
         }
         return this.healthP;
     }

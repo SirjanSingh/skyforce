@@ -20,6 +20,8 @@ var eF = 0; // fighter spawn cap (parallels e1r/e2r/e3n*)
 var powerUpsGroup, powerUpObj;
 var shieldAnim, speedAnim, coinAnim;
 var bossObj;
+var highScore = 0;
+var hitOsc, hitEnv, boomOsc, boomEnv;
 var bullet1Img, bullet2Img, bullet3Img;
 var explode;
 var explosionAnim;
@@ -161,6 +163,9 @@ function setup(){
     powerUpObj = new PowerUp();
     bossObj    = new Boss();
 
+    highScore = loadHighScore();
+    setupSfx();
+
     startGame = createSprite(251, 701);
     startGame.addImage(startGameImg);
     startGame.scale = 0.475;
@@ -204,6 +209,7 @@ function draw(){
     }
 
     drawSprites();
+    if(gameState === "menu") drawMenuOverlay();
     drawHud();
     if(bossObj)  bossObj.drawHpBar();
     if(levelObj) levelObj.drawBanner();
@@ -294,10 +300,12 @@ function drawGameOver(){
     fill("white");
     textAlign(CENTER, CENTER);
     textSize(48);
-    text("GAME OVER", width/2, height/2 - 40);
+    text("GAME OVER", width/2, height/2 - 60);
     textSize(20);
-    text("Final score: " + score, width/2, height/2 + 10);
-    text("Press R to restart", width/2, height/2 + 40);
+    text("Final score: " + score, width/2, height/2 - 10);
+    text("Best: " + highScore, width/2, height/2 + 18);
+    textSize(16);
+    text("Press R to restart", width/2, height/2 + 56);
     pop();
     textAlign(LEFT, BASELINE);
 }
@@ -310,20 +318,114 @@ function drawVictory(){
     fill(255, 220, 120);
     textAlign(CENTER, CENTER);
     textSize(46);
-    text("VICTORY!", width/2, height/2 - 40);
+    text("VICTORY!", width/2, height/2 - 60);
     fill("white");
     textSize(20);
-    text("Final score: " + score, width/2, height/2 + 10);
-    text("Press R to play again", width/2, height/2 + 40);
+    text("Final score: " + score, width/2, height/2 - 10);
+    text("Best: " + highScore, width/2, height/2 + 18);
+    textSize(16);
+    text("Press R to play again", width/2, height/2 + 56);
     pop();
     textAlign(LEFT, BASELINE);
 }
 
 function keyPressed(){
+    // Pause toggle. Implemented via noLoop()/loop() so p5.play's physics
+    // tick stops too -- otherwise sprites would keep drifting under the
+    // overlay. We paint the overlay manually before noLoop because once
+    // the loop stops, draw() won't run again until loop() resumes.
+    if(key === 'p' || key === 'P'){
+        if(gameState === "play"){
+            gameState = "paused";
+            drawPauseOverlay();
+            noLoop();
+            return;
+        } else if(gameState === "paused"){
+            gameState = "play";
+            loop();
+            return;
+        }
+    }
     if((gameState === "over" || gameState === "victory") &&
        (key === 'r' || key === 'R')){
         resetGame();
     }
+}
+
+function drawMenuOverlay(){
+    push();
+    fill("white");
+    noStroke();
+    textAlign(CENTER, BASELINE);
+    textSize(14);
+    text("High Score: " + highScore, width/2, 22);
+    textSize(11);
+    text("Mouse to fly  ·  P to pause  ·  R to restart on game over",
+         width/2, height - 16);
+    pop();
+    textAlign(LEFT, BASELINE);
+}
+
+function drawPauseOverlay(){
+    push();
+    fill(0, 0, 0, 200);
+    noStroke();
+    rect(0, 0, width, height);
+    fill("white");
+    textAlign(CENTER, CENTER);
+    textSize(40);
+    text("PAUSED", width/2, height/2 - 20);
+    textSize(16);
+    text("Press P to resume", width/2, height/2 + 30);
+    pop();
+    textAlign(LEFT, BASELINE);
+}
+
+function loadHighScore(){
+    try {
+        var h = parseInt(localStorage.getItem("skyforce_highScore") || "0", 10);
+        return isNaN(h) ? 0 : h;
+    } catch(e){ return 0; }
+}
+
+function saveHighScore(s){
+    try { localStorage.setItem("skyforce_highScore", String(s)); } catch(e){}
+}
+
+function maybeRecordHighScore(){
+    if(score > highScore){
+        highScore = score;
+        saveHighScore(highScore);
+    }
+}
+
+// Synth SFX -- repo only ships laser.mp3 + menu.mp3, and bundling extra
+// wavs for one-shot hits is overkill. p5.sound's oscillator + envelope
+// gives us readable "hit" (low-freq triangle blip) and "boom" (noise-y
+// sawtooth thud) without any new asset files.
+function setupSfx(){
+    hitOsc = new p5.Oscillator("triangle");
+    hitEnv = new p5.Envelope();
+    hitEnv.setADSR(0.001, 0.06, 0.0, 0.06);
+    hitEnv.setRange(0.25, 0);
+    hitOsc.amp(hitEnv);
+    hitOsc.freq(140);
+    hitOsc.start();
+
+    boomOsc = new p5.Oscillator("sawtooth");
+    boomEnv = new p5.Envelope();
+    boomEnv.setADSR(0.001, 0.1, 0.0, 0.12);
+    boomEnv.setRange(0.3, 0);
+    boomOsc.amp(boomEnv);
+    boomOsc.freq(70);
+    boomOsc.start();
+}
+
+function playHitSfx(){
+    if(hitEnv) hitEnv.play();
+}
+function playBoomSfx(){
+    if(boomEnv) boomEnv.play();
 }
 
 function resetGame(){
