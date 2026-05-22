@@ -1,71 +1,173 @@
+// Multi-level controller.
+//
+// Each level is one entry in LEVELS keyed by 1..N (index 0 unused so the
+// 'current level' integer maps directly). A level is described entirely
+// by its waves table: each wave is "starting at localFrame=startFrame,
+// spawn one of `type` every `every` frames, cap at `cap` total spawns".
+//
+// Old level1() hard-coded six if(frameC % X === 0 && frameC > (fc3+Y) &&
+// counterZ < N) branches. The new shape collapses to one for-loop and
+// lets a future level be added by appending one object to LEVELS.
+
+var LEVELS = [
+    null,
+    {
+        name: "Asteroid Belt",
+        waves: [
+            { type: "red1",    every: 18, cap: 6, startFrame: 60  },
+            { type: "red2",    every: 18, cap: 6, startFrame: 200 },
+        ],
+        boss: false,
+    },
+    {
+        name: "Heavy Resistance",
+        waves: [
+            { type: "red1",    every: 15, cap: 8, startFrame: 60  },
+            { type: "red2",    every: 15, cap: 8, startFrame: 60  },
+            { type: "fighter", every: 90, cap: 6, startFrame: 220 },
+            { type: "N1",      every: 22, cap: 6, startFrame: 400 },
+        ],
+        boss: false,
+    },
+    {
+        name: "Final Push",
+        waves: [
+            { type: "red1",    every: 12, cap: 10, startFrame: 60  },
+            { type: "red2",    every: 12, cap: 10, startFrame: 60  },
+            { type: "fighter", every: 60, cap: 8,  startFrame: 240 },
+            { type: "N1",      every: 20, cap: 6,  startFrame: 180 },
+            { type: "N2",      every: 22, cap: 6,  startFrame: 380 },
+            { type: "N3",      every: 28, cap: 4,  startFrame: 560 },
+            { type: "N4",      every: 28, cap: 4,  startFrame: 660 },
+        ],
+        boss: true,   // Phase 14 will plug in actual boss spawning
+    },
+];
+
 class Level {
     constructor(){
-
+        this.current     = 0;
+        this.startFrame  = 0;
+        this.waves       = null;
+        this.banner      = null;
+        this._nextStart  = 0;
+        this._nextLevel  = 0;
     }
 
-    level1(){
-         //creating player sprite
-        // player = createSprite(250,570,50,50);
+    start(n){
+        this.current     = n;
+        this.startFrame  = frameCount;
+        this._nextStart  = 0;
+        this._nextLevel  = 0;
+        var def = LEVELS[n];
+        // Clone wave defs so per-run `spawned` counters don't bleed across runs.
+        this.waves = def.waves.map(function(w){
+            return { type: w.type, every: w.every, cap: w.cap,
+                     startFrame: w.startFrame, spawned: 0 };
+        });
+        this.showBanner("Level " + n + ": " + def.name, 120);
+        // Legacy spawn-cap globals — unused for gating now, but kept zero
+        // so any debug overlay reading them stays sensible.
+        e1r = 0; e2r = 0; e3n1 = 0; e3n2 = 0; e3n3 = 0; e3n4 = 0; eF = 0;
+    }
+
+    showBanner(text, durFrames){
+        this.banner = { text: text, until: frameCount + durFrames };
+    }
+
+    update(){
+        // Pending next-level transition (set by complete()).
+        if(this._nextStart && frameCount >= this._nextStart){
+            this.start(this._nextLevel);
+        }
+        if(!this.current) return;
+
+        // Player setup (was the top half of the old level1()).
         player.visible = true;
         player.scale = 0.5;
-
-        //adding image to the player acc to the choice of user
         main_Screen.visible = false;
-
-        // Bind the chosen plane's animation once per selection. The old
-        // code called player.addAnimation() every frame, which appended a
-        // new label each tick and ballooned the sprite's animation map.
-        // case 2 also wrongly mapped to plane1 — fixed to plane2.
         if(player._planeNumber !== planeNumber){
-            var animMap = {
-                1: plane1, 2: plane2, 3: plane3, 4: plane4, 5: plane5,
-                6: plane6, 7: plane7, 8: plane8, 9: plane9
-            };
+            var animMap = { 1:plane1, 2:plane2, 3:plane3, 4:plane4, 5:plane5,
+                            6:plane6, 7:plane7, 8:plane8, 9:plane9 };
             player.addAnimation("simple", animMap[planeNumber] || plane1);
             player._planeNumber = planeNumber;
         }
 
         playerObj.checkCollision();
 
-            if(frameC % 15 === 0/*the rate of enemy production*/ && frameC > (fc3+75)/* the time after which the enemy will  be produced*/ && e1r < 5/*limiting the number of enemy produced to 5*/){
-                enemiesObj.enemiesRed1(0,120,5,0)   // creaing  the enemes set of 5
+        var localFrame = frameCount - this.startFrame;
+        for(var i = 0; i < this.waves.length; i++){
+            var w = this.waves[i];
+            var since = localFrame - w.startFrame;
+            if(since >= 0 && since % w.every === 0 && w.spawned < w.cap){
+                this._spawnFromWave(w);
+                w.spawned++;
             }
-            if(frameC % 15 === 0 && frameC > (fc3 + 150) && e2r < 5 ){
-                enemiesObj.enemiesRed2(500,120,-5,0)
-            }
-           // the second wave of enemies begin from here...with another animation
-            if(frameC % 22 === 0 && frameC > (fc3 + 200) && e3n1 < 8){
-                enemiesObj.enemiesN1(60,0,2,4,1);
-            }
-            if(frameC % 22 === 0 && frameC > (fc3 + 320) && e3n2 < 8){
-                enemiesObj.enemiesN1(440,0,-2,4,2);
-            }
-            if(frameC % 25 === 0 && frameC > (fc3 + 420) && e3n3 < 8){
-                enemiesObj.enemiesN1(60,0,0,4,3);
-            }
-            if(frameC % 25 === 0 && frameC > (fc3 + 500) && e3n4 < 8){
-                enemiesObj.enemiesN1(440,0,0,4,4);
-            }
-
-            // Fighter wave: starts later, slower spawn cadence, alternates sides.
-            if(frameC % 90 === 0 && frameC > (fc3 + 280) && eF < 8){
-                var sideX = (eF % 2 === 0) ? 90 : 410;
-                enemiesObj.enemiesFighter(sideX, -20, 0, 1.5);
-            }
-
-            enemiesObj.rotateE12(0,5,1);
-            enemiesObj.rotateE12(0,5,2);
-            enemiesObj.updateFighters();
-
-            // Rapid-fire halves the laser cooldown while active.
-            var fireEvery = playerObj.hasRapid() ? 2 : 4;
-            if(frameC % fireEvery === 0){
-                laserObj.createLasers();
-            }
-            laserObj.collision();
-            powerUpObj.checkCollision();
         }
-    display(){
 
+        enemiesObj.rotateE12(0, 5, 1);
+        enemiesObj.rotateE12(0, 5, 2);
+        enemiesObj.updateFighters();
+
+        var fireEvery = playerObj.hasRapid() ? 2 : 4;
+        if(frameC % fireEvery === 0){
+            laserObj.createLasers();
+        }
+        laserObj.collision();
+        powerUpObj.checkCollision();
+
+        // Level complete: every wave exhausted and the field cleared.
+        // Boss levels defer this to Phase 14.
+        if(!this._nextStart && !LEVELS[this.current].boss){
+            var allSpawned = this.waves.every(function(w){ return w.spawned >= w.cap; });
+            if(allSpawned && enemiesGroup.length === 0){
+                this.complete();
+            }
+        }
     }
+
+    _spawnFromWave(w){
+        switch(w.type){
+            case "red1":    enemiesObj.enemiesRed1(0,   120,  5, 0); break;
+            case "red2":    enemiesObj.enemiesRed2(500, 120, -5, 0); break;
+            case "fighter":
+                var sideX = (w.spawned % 2 === 0) ? 90 : 410;
+                enemiesObj.enemiesFighter(sideX, -20, 0, 1.5);
+                break;
+            case "N1":      enemiesObj.enemiesN1(60,  0,  2, 4, 1); break;
+            case "N2":      enemiesObj.enemiesN1(440, 0, -2, 4, 2); break;
+            case "N3":      enemiesObj.enemiesN1(60,  0,  0, 4, 3); break;
+            case "N4":      enemiesObj.enemiesN1(440, 0,  0, 4, 4); break;
+        }
+    }
+
+    complete(){
+        if(this.current >= LEVELS.length - 1){
+            gameState = "victory";
+            this.showBanner("VICTORY!", 600);
+        } else {
+            this.showBanner("Level " + this.current + " complete!", 90);
+            this._nextLevel = this.current + 1;
+            this._nextStart = frameCount + 90;
+        }
+    }
+
+    drawBanner(){
+        if(!this.banner || frameCount > this.banner.until) return;
+        push();
+        fill(0, 0, 0, 160);
+        noStroke();
+        rect(0, height/2 - 50, width, 100);
+        fill("white");
+        textAlign(CENTER, CENTER);
+        textSize(26);
+        text(this.banner.text, width/2, height/2);
+        pop();
+        textAlign(LEFT, BASELINE);
+    }
+
+    // Game.play() still calls level1() — alias preserves the old entry point.
+    level1(){ this.update(); }
+
+    display(){}
 }

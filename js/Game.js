@@ -11,6 +11,7 @@ class Game {
             if(mousePressedOver(startGame)){
                 gameState = "play";
                 fc3 = frameCount;
+                levelObj.start(1);
             }
             if(frameC > (fc2 + 50) || fc2 === undefined){
                 if(mousePressedOver(plane_Selection)){

@@ -180,7 +180,7 @@ function draw(){
 
     // Scrolling space background only while actually flying (menu /
     // plane-select keep the painted main_Screen sprite art).
-    if(gameState === "play" || gameState === "over"){
+    if(gameState === "play" || gameState === "over" || gameState === "victory"){
         drawScrollingBg();
     }
 
@@ -194,7 +194,7 @@ function draw(){
 
     gameObj.start();
 
-    if(gameState !== "over"){
+    if(gameState !== "over" && gameState !== "victory"){
         player.x = mouseX;
         player.y = mouseY;
         player1.x = mouseX;
@@ -203,9 +203,12 @@ function draw(){
 
     drawSprites();
     drawHud();
+    if(levelObj) levelObj.drawBanner();
 
     if(gameState === "over"){
         drawGameOver();
+    } else if(gameState === "victory"){
+        drawVictory();
     }
     pop();
 }
@@ -227,7 +230,7 @@ function drawScrollingBg(){
 }
 
 function drawHud(){
-    if(gameState !== "play" && gameState !== "over") return;
+    if(gameState !== "play" && gameState !== "over" && gameState !== "victory") return;
     fill("white");
     noStroke();
     textSize(18);
@@ -237,7 +240,12 @@ function drawHud(){
     text("Score: " + score, width/2, 24);
     textAlign(RIGHT, BASELINE);
     textSize(12);
-    text("FPS: " + Math.round(frameRate()), width - 14, 24);
+    if(levelObj && levelObj.current){
+        text("LVL " + levelObj.current + "  FPS " + Math.round(frameRate()),
+             width - 14, 24);
+    } else {
+        text("FPS: " + Math.round(frameRate()), width - 14, 24);
+    }
     textAlign(LEFT, BASELINE);
 
     // Power-up timers under the HP readout.
@@ -291,8 +299,26 @@ function drawGameOver(){
     textAlign(LEFT, BASELINE);
 }
 
+function drawVictory(){
+    push();
+    fill(0, 0, 0, 180);
+    noStroke();
+    rect(0, 0, width, height);
+    fill(255, 220, 120);
+    textAlign(CENTER, CENTER);
+    textSize(46);
+    text("VICTORY!", width/2, height/2 - 40);
+    fill("white");
+    textSize(20);
+    text("Final score: " + score, width/2, height/2 + 10);
+    text("Press R to play again", width/2, height/2 + 40);
+    pop();
+    textAlign(LEFT, BASELINE);
+}
+
 function keyPressed(){
-    if(gameState === "over" && (key === 'r' || key === 'R')){
+    if((gameState === "over" || gameState === "victory") &&
+       (key === 'r' || key === 'R')){
         resetGame();
     }
 }
@@ -311,10 +337,8 @@ function resetGame(){
     powerUpsGroup.removeSprites();
     playerObj.shieldUntil = 0;
     playerObj.rapidUntil = 0;
-    e1r = 0; e2r = 0;
-    e3n1 = 0; e3n2 = 0; e3n3 = 0; e3n4 = 0;
-    eF = 0;
     fc3 = frameCount;
     frameC = 0;
     gameState = "play";
+    levelObj.start(1);
 }
