@@ -57,10 +57,13 @@ class Level {
             enemiesObj.rotateE12(0,5,2);
             enemiesObj.updateFighters();
 
-            if(frameC % 4 === 0){
+            // Rapid-fire halves the laser cooldown while active.
+            var fireEvery = playerObj.hasRapid() ? 2 : 4;
+            if(frameC % fireEvery === 0){
                 laserObj.createLasers();
             }
             laserObj.collision();
+            powerUpObj.checkCollision();
         }
     display(){
 

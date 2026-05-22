@@ -1,6 +1,15 @@
 class Player {
     constructor(){
-        this.healthP = 100
+        this.healthP = 100;
+        this.shieldUntil = 0;  // frameCount past which shield expires
+        this.rapidUntil  = 0;  // ditto for rapid-fire
+    }
+
+    isShielded(){
+        return frameCount < this.shieldUntil;
+    }
+    hasRapid(){
+        return frameCount < this.rapidUntil;
     }
      
     checkCollision(){
@@ -35,8 +44,14 @@ class Player {
         }
     }
     health(loss){
+        // Shield absorbs the hit completely (still shake a little so the
+        // player gets feedback that something hit them).
+        if(this.isShielded()){
+            triggerShake(4, 3);
+            return this.healthP;
+        }
         this.healthP = this.healthP - loss;
-        triggerShake(10, 6); // every hit shakes; bigger hits could pass larger mag
+        triggerShake(10, 6);
 
         // Bug fix: previous code read this.health (undefined) and assigned
         // to it, which (a) never tripped the <=0 branch and (b) shadowed

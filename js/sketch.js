@@ -16,6 +16,9 @@ var enemyLasersGroup;
 var fighterAnim;
 var enemyBulletImg;
 var eF = 0; // fighter spawn cap (parallels e1r/e2r/e3n*)
+
+var powerUpsGroup, powerUpObj;
+var shieldAnim, speedAnim, coinAnim;
 var bullet1Img, bullet2Img, bullet3Img;
 var explode;
 var explosionAnim;
@@ -75,6 +78,29 @@ function preload(){
         "assets/anim/fighter/Enemy-Fighter-Get0007.png",
         "assets/anim/fighter/Enemy-Fighter-Get0008.png"
     );
+    shieldAnim = loadAnimation(
+        "assets/anim/shield/Shield-PowerUps0001.png",
+        "assets/anim/shield/Shield-PowerUps0002.png",
+        "assets/anim/shield/Shield-PowerUps0003.png",
+        "assets/anim/shield/Shield-PowerUps0004.png",
+        "assets/anim/shield/Shield-PowerUps0005.png"
+    );
+    speedAnim = loadAnimation(
+        "assets/anim/speed/Speed-Booster0001.png",
+        "assets/anim/speed/Speed-Booster0002.png",
+        "assets/anim/speed/Speed-Booster0003.png",
+        "assets/anim/speed/Speed-Booster0004.png",
+        "assets/anim/speed/Speed-Booster0005.png",
+        "assets/anim/speed/Speed-Booster0006.png",
+        "assets/anim/speed/Speed-Booster0007.png"
+    );
+    coinAnim = loadAnimation(
+        "assets/anim/coin/Star-Coin-Animation0001.png",
+        "assets/anim/coin/Star-Coin-Animation0002.png",
+        "assets/anim/coin/Star-Coin-Animation0003.png",
+        "assets/anim/coin/Star-Coin-Animation0004.png",
+        "assets/anim/coin/Star-Coin-Animation0005.png"
+    );
     explosionAnim = loadAnimation(
         "assets/anim/explosionA/1.png",  "assets/anim/explosionA/2.png",
         "assets/anim/explosionA/3.png",  "assets/anim/explosionA/4.png",
@@ -121,6 +147,7 @@ function setup(){
     enemiesFighterGroup = new Group();
     lasersGroup         = new Group();
     enemyLasersGroup    = new Group();
+    powerUpsGroup       = new Group();
 
     playerObj  = new Player();
     selectObj  = new Select_Plane();
@@ -130,6 +157,7 @@ function setup(){
     backObj    = new Back();
     scoreObj   = new Score();
     levelObj   = new Level();
+    powerUpObj = new PowerUp();
 
     startGame = createSprite(251, 701);
     startGame.addImage(startGameImg);
@@ -211,6 +239,31 @@ function drawHud(){
     textSize(12);
     text("FPS: " + Math.round(frameRate()), width - 14, 24);
     textAlign(LEFT, BASELINE);
+
+    // Power-up timers under the HP readout.
+    var y = 46;
+    if(playerObj.isShielded()){
+        var sLeft = Math.ceil((playerObj.shieldUntil - frameCount) / 60);
+        fill(120, 200, 255);
+        text("SHIELD " + sLeft + "s", 14, y);
+        y += 18;
+    }
+    if(playerObj.hasRapid()){
+        var rLeft = Math.ceil((playerObj.rapidUntil - frameCount) / 60);
+        fill(255, 220, 100);
+        text("RAPID " + rLeft + "s", 14, y);
+    }
+
+    // Soft shield ring around the player.
+    if(playerObj.isShielded() && gameState === "play"){
+        push();
+        noFill();
+        var pulse = 26 + 3 * sin(frameCount * 6);
+        stroke(120, 200, 255, 180);
+        strokeWeight(2);
+        ellipse(player.x, player.y, pulse * 2, pulse * 2);
+        pop();
+    }
 }
 
 // Called whenever the player gets hit, so the damage carries weight.
@@ -255,6 +308,9 @@ function resetGame(){
     enemiesFighterGroup.removeSprites();
     lasersGroup.removeSprites();
     enemyLasersGroup.removeSprites();
+    powerUpsGroup.removeSprites();
+    playerObj.shieldUntil = 0;
+    playerObj.rapidUntil = 0;
     e1r = 0; e2r = 0;
     e3n1 = 0; e3n2 = 0; e3n3 = 0; e3n4 = 0;
     eF = 0;
