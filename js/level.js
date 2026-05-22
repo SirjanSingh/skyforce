@@ -116,11 +116,21 @@ class Level {
         laserObj.collision();
         powerUpObj.checkCollision();
 
-        // Level complete: every wave exhausted and the field cleared.
-        // Boss levels defer this to Phase 14.
-        if(!this._nextStart && !LEVELS[this.current].boss){
-            var allSpawned = this.waves.every(function(w){ return w.spawned >= w.cap; });
-            if(allSpawned && enemiesGroup.length === 0){
+        // Boss spawns once all regular waves are exhausted and the field
+        // is clear. Banner gives the player a beat to brace.
+        var def = LEVELS[this.current];
+        var allSpawned = this.waves.every(function(w){ return w.spawned >= w.cap; });
+        if(def.boss && allSpawned && !bossObj.spawned && !bossObj.defeated
+           && enemiesGroup.length === 0){
+            bossObj.spawn();
+            this.showBanner("BOSS INCOMING", 90);
+        }
+        bossObj.update();
+
+        // Level-complete check.
+        if(!this._nextStart){
+            var bossDone = !def.boss || bossObj.defeated;
+            if(allSpawned && enemiesGroup.length === 0 && bossDone){
                 this.complete();
             }
         }

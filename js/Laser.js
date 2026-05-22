@@ -41,10 +41,17 @@ class Laser {
             if(enemySprite.hp <= 0){
                 self.spawnExplosion(enemySprite.x, enemySprite.y);
                 score += (enemySprite.points || 100);
-                // Big enemies (N formation / fighters / future boss) have
-                // a much higher drop rate. Heuristic: points >= 200.
+                // Big enemies (N formation / fighters / boss) have a much
+                // higher drop rate. Heuristic: points >= 200.
                 var big = (enemySprite.points || 0) >= 200;
                 powerUpObj.rollDrop(enemySprite.x, enemySprite.y, big);
+                if(enemySprite._isBoss){
+                    bossObj.defeated = true;
+                    triggerShake(40, 14);
+                    // Big celebratory blast.
+                    self.spawnExplosion(enemySprite.x - 20, enemySprite.y - 20);
+                    self.spawnExplosion(enemySprite.x + 20, enemySprite.y + 20);
+                }
                 enemySprite.remove();
             }
         });

@@ -19,6 +19,7 @@ var eF = 0; // fighter spawn cap (parallels e1r/e2r/e3n*)
 
 var powerUpsGroup, powerUpObj;
 var shieldAnim, speedAnim, coinAnim;
+var bossObj;
 var bullet1Img, bullet2Img, bullet3Img;
 var explode;
 var explosionAnim;
@@ -158,6 +159,7 @@ function setup(){
     scoreObj   = new Score();
     levelObj   = new Level();
     powerUpObj = new PowerUp();
+    bossObj    = new Boss();
 
     startGame = createSprite(251, 701);
     startGame.addImage(startGameImg);
@@ -203,6 +205,7 @@ function draw(){
 
     drawSprites();
     drawHud();
+    if(bossObj)  bossObj.drawHpBar();
     if(levelObj) levelObj.drawBanner();
 
     if(gameState === "over"){
@@ -337,6 +340,7 @@ function resetGame(){
     powerUpsGroup.removeSprites();
     playerObj.shieldUntil = 0;
     playerObj.rapidUntil = 0;
+    bossObj.reset();
     fc3 = frameCount;
     frameC = 0;
     gameState = "play";
