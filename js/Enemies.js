@@ -41,6 +41,7 @@ class Enemies {
             var safeYv = Math.max(yv, 1);
             enemy.lifetime = displayHeight / safeYv;
             enemy.points = 100;
+            enemy.hp = 1;
             enemiesGroup.add(enemy);//adding the enemies to the Group
     }
     //xv stands for Xvelocity and think further(yv for Yvelocity)
@@ -53,6 +54,7 @@ class Enemies {
         enemy.lifetime  = 500;// giving lifetime
         enemiesGroup.add(enemy);// adding enemies into global group
         enemy.points = 150;
+        enemy.hp = 1;
         enemiesRedGroup1.add(enemy);// adding enemies into  personel group
     }
 
@@ -63,8 +65,9 @@ class Enemies {
         enemy.velocityX = xv;
         enemy.velocityY = yv;
         enemy.lifetime  = 500;
-        enemiesGroup.add(enemy); 
+        enemiesGroup.add(enemy);
         enemy.points = 150;
+        enemy.hp = 1;
         enemiesRedGroup2.add(enemy);
     }
 
@@ -93,6 +96,7 @@ class Enemies {
         enemiesGroupN.add(enemy)// adding the enemimes in individual groups
 
         enemy.points = 200;
+        enemy.hp = 3; // bigger formation ships take 3 hits
         enemiesGroup.add(enemy); // adding the enemimes in universal groups
     }
 

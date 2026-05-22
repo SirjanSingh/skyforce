@@ -25,13 +25,19 @@ class Laser {
     collision(){
         // Single source of truth for laser-vs-enemy hits.
         // p5.play's group.overlap fires the callback once per (laser, enemy)
-        // pair per frame, so no double-counting and no parallel-array bookkeeping.
+        // pair per frame. Enemies carry .hp (set at spawn — defaults to 1
+        // so the existing red/red2/N spawns still die in one shot); a hit
+        // always consumes the laser and decrements hp, but only spawns an
+        // explosion and awards points when hp drops to 0.
         var self = this;
         lasersGroup.overlap(enemiesGroup, function(laserSprite, enemySprite){
-            self.spawnExplosion(enemySprite.x, enemySprite.y);
-            score += (enemySprite.points || 100);
             laserSprite.remove();
-            enemySprite.remove();
+            enemySprite.hp = (enemySprite.hp || 1) - 1;
+            if(enemySprite.hp <= 0){
+                self.spawnExplosion(enemySprite.x, enemySprite.y);
+                score += (enemySprite.points || 100);
+                enemySprite.remove();
+            }
         });
     }
 
