@@ -41,7 +41,18 @@ class Laser {
             if(enemySprite.hp <= 0){
                 self.spawnExplosion(enemySprite.x, enemySprite.y);
                 playBoomSfx();
-                score += (enemySprite.points || 100);
+                // Combo: each kill within 90 frames of the last bumps
+                // the multiplier by 0.25, capped at 4.0. comboUntil is
+                // the frameCount at which the combo expires.
+                if(frameCount < comboUntil){
+                    comboCount = Math.min(comboCount + 1, 24);
+                } else {
+                    comboCount = 1;
+                }
+                comboUntil = frameCount + 90;
+                var mult = 1 + (comboCount - 1) * 0.25;
+                if(mult > 4) mult = 4;
+                score += Math.floor((enemySprite.points || 100) * mult);
                 // Big enemies (N formation / fighters / boss) have a much
                 // higher drop rate. Heuristic: points >= 200.
                 var big = (enemySprite.points || 0) >= 200;

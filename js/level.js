@@ -38,10 +38,11 @@ var LEVELS = [
         name: "Diving Squadron",
         tint: [70, 20, 20],        // dark red
         waves: [
-            { type: "red1",    every: 14, cap: 6,  startFrame: 60  },
-            { type: "diver",   every: 18, cap: 12, startFrame: 120 },
-            { type: "weaver",  every: 60, cap: 6,  startFrame: 240 },
-            { type: "fighter", every: 100,cap: 4,  startFrame: 360 },
+            { type: "red1",     every: 14,  cap: 6,  startFrame: 60  },
+            { type: "diver",    every: 18,  cap: 12, startFrame: 120 },
+            { type: "weaver",   every: 60,  cap: 6,  startFrame: 240 },
+            { type: "asteroid", every: 80,  cap: 4,  startFrame: 200 },
+            { type: "fighter",  every: 100, cap: 4,  startFrame: 360 },
         ],
         boss: false,
     },
@@ -49,11 +50,12 @@ var LEVELS = [
         name: "Crossfire",
         tint: [30, 50, 20],        // dark olive
         waves: [
-            { type: "gunner",  every: 110, cap: 6, startFrame: 60  },
-            { type: "weaver",  every: 55,  cap: 8, startFrame: 180 },
-            { type: "diver",   every: 16,  cap: 10,startFrame: 280 },
-            { type: "fighter", every: 80,  cap: 6, startFrame: 360 },
-            { type: "N1",      every: 22,  cap: 4, startFrame: 480 },
+            { type: "gunner",   every: 110, cap: 6,  startFrame: 60  },
+            { type: "weaver",   every: 55,  cap: 8,  startFrame: 180 },
+            { type: "asteroid", every: 60,  cap: 6,  startFrame: 220 },
+            { type: "diver",    every: 16,  cap: 10, startFrame: 280 },
+            { type: "fighter",  every: 80,  cap: 6,  startFrame: 360 },
+            { type: "N1",       every: 22,  cap: 4,  startFrame: 480 },
         ],
         boss: false,
     },
@@ -61,15 +63,16 @@ var LEVELS = [
         name: "Final Push",
         tint: [60, 10, 10],        // deep red, ominous
         waves: [
-            { type: "red1",    every: 12, cap: 10, startFrame: 60  },
-            { type: "red2",    every: 12, cap: 10, startFrame: 60  },
-            { type: "diver",   every: 18, cap: 8,  startFrame: 120 },
-            { type: "fighter", every: 60, cap: 8,  startFrame: 240 },
-            { type: "gunner",  every: 130,cap: 4,  startFrame: 300 },
-            { type: "N1",      every: 20, cap: 6,  startFrame: 180 },
-            { type: "N2",      every: 22, cap: 6,  startFrame: 380 },
-            { type: "N3",      every: 28, cap: 4,  startFrame: 560 },
-            { type: "N4",      every: 28, cap: 4,  startFrame: 660 },
+            { type: "red1",     every: 12,  cap: 10, startFrame: 60  },
+            { type: "red2",     every: 12,  cap: 10, startFrame: 60  },
+            { type: "diver",    every: 18,  cap: 8,  startFrame: 120 },
+            { type: "asteroid", every: 50,  cap: 8,  startFrame: 180 },
+            { type: "fighter",  every: 60,  cap: 8,  startFrame: 240 },
+            { type: "gunner",   every: 130, cap: 4,  startFrame: 300 },
+            { type: "N1",       every: 20,  cap: 6,  startFrame: 180 },
+            { type: "N2",       every: 22,  cap: 6,  startFrame: 380 },
+            { type: "N3",       every: 28,  cap: 4,  startFrame: 560 },
+            { type: "N4",       every: 28,  cap: 4,  startFrame: 660 },
         ],
         boss: true,
     },
@@ -192,6 +195,9 @@ class Level {
                 break;
             case "weaver":
                 enemiesObj.enemiesWeaver(random(60, width - 60));
+                break;
+            case "asteroid":
+                asteroidObj.spawn(random(40, width - 40));
                 break;
         }
     }

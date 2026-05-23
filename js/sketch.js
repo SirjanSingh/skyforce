@@ -29,6 +29,8 @@ var hitOsc, hitEnv, boomOsc, boomEnv;
 // .spawned counter so these globals are mostly informational now.
 var enemiesDiverGroup, enemiesGunnerGroup, enemiesWeaverGroup;
 var eD = 0, eG = 0, eW = 0;
+var rockImg, asteroidObj;
+var comboCount = 0, comboUntil = 0;
 
 // Progress save: which level the player has cleared. Level N is
 // unlocked if N <= maxLevelCompleted + 1, so a fresh save unlocks 1.
@@ -82,6 +84,7 @@ function preload(){
     explode  = loadImage("assets/sprites/explode.png");
     spaceBgImg = loadImage("assets/sprites/bg/space.jpg");
     enemyBulletImg = loadImage("assets/sprites/bullets/EnemyBulletPrysznic_L5.png");
+    rockImg = loadImage("assets/anim/rock/Rock-Obstacles.png");
     fighterAnim = loadAnimation(
         "assets/anim/fighter/Enemy-Fighter-Get0001.png",
         "assets/anim/fighter/Enemy-Fighter-Get0002.png",
@@ -176,6 +179,7 @@ function setup(){
     levelObj   = new Level();
     powerUpObj = new PowerUp();
     bossObj    = new Boss();
+    asteroidObj = new Asteroid();
 
     highScore = loadHighScore();
     maxLevelCompleted = loadMaxLevel();
@@ -240,8 +244,6 @@ function draw(){
 }
 
 function drawScrollingBg(){
-    // Tile the bg image vertically and scroll. imageMode CORNER (default)
-    // means (x,y) is the top-left of the image.
     var iw = spaceBgImg.width;
     var ih = spaceBgImg.height;
     var scale = width / iw;
@@ -249,10 +251,25 @@ function drawScrollingBg(){
     var drawH = ih * scale;
     bgScrollY = (bgScrollY + 1.5) % drawH;
     var y = bgScrollY - drawH;
+
+    // Per-level color tint. Same space.jpg gets 5 different moods --
+    // dim blue / dark purple / dark red / dark olive / deep red --
+    // by lightening the LEVELS[current].tint and using p5's tint().
+    // Falls back to a soft neutral wash on menu / select / pre-level.
+    var t = (levelObj && levelObj.current && LEVELS[levelObj.current])
+            ? LEVELS[levelObj.current].tint
+            : [180, 180, 200];
+    push();
+    // Brighten the source tint a bit so the bg isn't murky.
+    tint(Math.min(255, t[0] + 130),
+         Math.min(255, t[1] + 130),
+         Math.min(255, t[2] + 130));
     while(y < height){
         image(spaceBgImg, 0, y, drawW, drawH);
         y += drawH;
     }
+    pop();
+    noTint();
 }
 
 function drawHud(){
@@ -274,8 +291,21 @@ function drawHud(){
     }
     textAlign(LEFT, BASELINE);
 
+    // Combo multiplier — only painted while a combo is active.
+    if(comboCount > 1 && frameCount < comboUntil){
+        var mult = Math.min(4, 1 + (comboCount - 1) * 0.25);
+        var pulse = 1 + 0.06 * sin(frameCount * 12);
+        push();
+        fill(255, 200, 80);
+        textSize(16 * pulse);
+        textAlign(CENTER, BASELINE);
+        text("COMBO x" + mult.toFixed(2), width/2, 44);
+        pop();
+        textAlign(LEFT, BASELINE);
+    }
+
     // Power-up timers under the HP readout.
-    var y = 46;
+    var y = 64;
     if(playerObj.isShielded()){
         var sLeft = Math.ceil((playerObj.shieldUntil - frameCount) / 60);
         fill(120, 200, 255);
@@ -416,6 +446,8 @@ function mousePressed(){
 
 function startLevel(n){
     score = 0;
+    comboCount = 0;
+    comboUntil = 0;
     playerObj.healthP = 100;
     playerObj.shieldUntil = 0;
     playerObj.rapidUntil = 0;

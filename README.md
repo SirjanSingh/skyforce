@@ -22,22 +22,37 @@ audio/animation assets that way.
 | Input          | Action                                  |
 | -------------- | --------------------------------------- |
 | **Mouse**      | Fly the plane (player follows cursor)   |
-| **Click**      | Pick options in the menu                |
+| **Click**      | Pick options in the menu / level map    |
 | **P**          | Pause / resume                          |
-| **R**          | Restart after Game Over or Victory      |
+| **R**          | Restart at level 1 after Game Over      |
+| **M**          | Return to main menu from Game Over      |
+| **B**          | Back from level select to main menu     |
 
 Lasers auto-fire. The plane-select screen (`SELECT PLANE` button on the menu)
 lets you pick one of nine cosmetic planes — purely visual.
 
 ## Levels
 
-| #   | Name              | What you'll see                                                          |
-| --- | ----------------- | ------------------------------------------------------------------------ |
-| 1   | Asteroid Belt     | Red fry only. Onboarding pace.                                           |
-| 2   | Heavy Resistance  | Red waves + animated fighters that shoot back + N formations             |
-| 3   | Final Push        | Everything overlapping, faster cadence, ends in a 2-phase **boss** fight |
+Five-level campaign. Clicking **START** from the menu opens the level select
+map. A level unlocks once you've cleared the one before it; progress is saved
+in your browser's localStorage so you don't have to grind level 1 every visit.
 
-Beating level 3's boss flips the game to the **VICTORY** screen.
+| #   | Name              | Threat mix                                                       |
+| --- | ----------------- | ---------------------------------------------------------------- |
+| 1   | Asteroid Belt     | Red fry only. Onboarding pace.                                   |
+| 2   | Heavy Resistance  | Red waves + fighters that shoot back + N formations              |
+| 3   | Diving Squadron   | Fast green divers + cyan weavers + asteroid obstacles            |
+| 4   | Crossfire         | Yellow gunners that hover & shoot + weavers + fighters + N       |
+| 5   | Final Push        | Everything overlapping + asteroids + **2-phase boss**            |
+
+Each level tints the scrolling background a different color. Beating the
+level-5 boss flips the game to the **VICTORY** screen.
+
+## Combos
+
+Killing enemies within 90 frames of each other builds a combo multiplier
+(+0.25 per kill, capped at x4). Multiplier resets if you don't kill anything
+for ~1.5 seconds. Active multiplier shows in gold under the HP readout.
 
 ## Power-ups
 
@@ -103,6 +118,9 @@ the revamp from "buggy 6-year-old code" to "playable 3-level shooter":
 | 13    | `LEVELS` data table + 3 distinct levels + level-complete banner      |
 | 14    | Two-phase boss with HP bar, side-bob, triple-spread fire at <50%     |
 | 15    | Pause (P), localStorage high score, synthesized hit/boom SFX, README |
+| 16    | Balance pass + Return-to-Menu (M) from end screens                   |
+| 17    | 5 levels, 3 new enemy variants (Diver/Gunner/Weaver), level map      |
+| 18    | Per-level bg tints, asteroid obstacles (rock sprite), combo system   |
 
 See [`IMPLEMENTATION_PLAN.md`](IMPLEMENTATION_PLAN.md) for the original
 checkboxed plan and [`ANALYSIS.md`](ANALYSIS.md) / [`FIXES.md`](FIXES.md) for
