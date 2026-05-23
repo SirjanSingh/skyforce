@@ -6,22 +6,26 @@
 // reads (playerObj.shieldUntil / playerObj.rapidUntil) and the
 // damage / fire-rate gates can be written once and trusted everywhere.
 
+// Sprite scale tuned individually because the 3 source animations were
+// drawn at very different native resolutions. Durations & healAmount
+// nerfed in the Phase 16 balance pass: the original 6s windows + 25 HP
+// heal made the player nearly invincible once any drop arrived.
 var POWERUP_TYPES = {
     shield: {
         anim: "shield",
-        scale: 0.6,
-        durationFrames: 360,     // 6 seconds at 60 fps
+        scale: 0.18,
+        durationFrames: 240,     // 4 seconds at 60 fps
     },
     rapid: {
         anim: "speed",
-        scale: 0.6,
-        durationFrames: 360,
+        scale: 0.22,
+        durationFrames: 240,
     },
     heal: {
         anim: "coin",
-        scale: 0.6,
+        scale: 0.32,
         durationFrames: 0,       // instant
-        healAmount: 25,
+        healAmount: 18,
     },
 };
 
@@ -49,13 +53,15 @@ class PowerUp {
     // Caller decides what to drop. Heal favored when player is hurt.
     rollDrop(x, y, fromBigEnemy){
         var roll = random();
-        var chance = fromBigEnemy ? 0.30 : 0.08;
+        // Balance: was 0.30 / 0.08 -- too generous, the player stayed
+        // permanently buffed once level 2 was in full swing.
+        var chance = fromBigEnemy ? 0.14 : 0.04;
         if(roll > chance) return;
 
-        var hurt = playerObj.healthP < 60;
+        var hurt = playerObj.healthP < 50;
         var pick;
-        if(hurt && random() < 0.5) pick = "heal";
-        else                       pick = random(["shield", "rapid", "heal"]);
+        if(hurt && random() < 0.55) pick = "heal";
+        else                        pick = random(["shield", "rapid", "heal"]);
         this.spawn(x, y, pick);
     }
 

@@ -54,7 +54,7 @@ class Enemies {
         enemy.lifetime  = 500;// giving lifetime
         enemiesGroup.add(enemy);// adding enemies into global group
         enemy.points = 150;
-        enemy.hp = 1;
+        enemy.hp = 2;   // was 1 (Phase 16 balance)
         enemiesRedGroup1.add(enemy);// adding enemies into  personel group
     }
 
@@ -67,7 +67,7 @@ class Enemies {
         enemy.lifetime  = 500;
         enemiesGroup.add(enemy);
         enemy.points = 150;
-        enemy.hp = 1;
+        enemy.hp = 2;   // was 1 (Phase 16 balance)
         enemiesRedGroup2.add(enemy);
     }
 
@@ -96,7 +96,7 @@ class Enemies {
         enemiesGroupN.add(enemy)// adding the enemimes in individual groups
 
         enemy.points = 200;
-        enemy.hp = 3; // bigger formation ships take 3 hits
+        enemy.hp = 4; // bigger formation ships take 4 hits (was 3)
         enemiesGroup.add(enemy); // adding the enemimes in universal groups
     }
 
@@ -111,10 +111,11 @@ class Enemies {
         enemy.velocityY = yv;
         enemy.lifetime  = 800;
         enemy.points = 250;
-        enemy.hp = 2;
+        enemy.hp = 3;   // was 2 (Phase 16 balance)
         enemy.setCollider("circle", 0, 0, 30);
-        enemy._lastFire = frameCount + Math.floor(random(30, 90));
-        enemy._fireEvery = Math.floor(random(75, 110));
+        enemy._lastFire = frameCount + Math.floor(random(20, 60));
+        // Fires more often (was 75-110) so it actually threatens.
+        enemy._fireEvery = Math.floor(random(55, 85));
         enemiesFighterGroup.add(enemy);
         enemiesGroup.add(enemy);
     }

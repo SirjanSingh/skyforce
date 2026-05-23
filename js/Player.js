@@ -35,10 +35,11 @@ class Player {
                 enemiesGroupN[i].destroy();
             }
         }
-        // Enemy lasers do half a ram's damage and just disappear on hit.
+        // Enemy lasers now do real damage (was 4) so the fighter waves
+        // actually matter for survival.
         for(var i = 0; i < enemyLasersGroup.length; i++){
             if(player.isTouching(enemyLasersGroup[i])){
-                playerObj.health(4);
+                playerObj.health(7);
                 enemyLasersGroup[i].remove();
             }
         }

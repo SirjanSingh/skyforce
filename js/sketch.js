@@ -294,39 +294,54 @@ function triggerShake(dur, mag){
 
 function drawGameOver(){
     push();
-    fill(0, 0, 0, 180);
+    fill(0, 0, 0, 200);
     noStroke();
     rect(0, 0, width, height);
     fill("white");
     textAlign(CENTER, CENTER);
-    textSize(48);
-    text("GAME OVER", width/2, height/2 - 60);
-    textSize(20);
-    text("Final score: " + score, width/2, height/2 - 10);
-    text("Best: " + highScore, width/2, height/2 + 18);
-    textSize(16);
-    text("Press R to restart", width/2, height/2 + 56);
+    textSize(44);
+    text("GAME OVER", width/2, height/2 - 80);
+    textSize(18);
+    text("Final score: " + score, width/2, height/2 - 32);
+    text("Best: " + highScore, width/2, height/2 - 8);
+    drawEndScreenButtons();
     pop();
     textAlign(LEFT, BASELINE);
 }
 
 function drawVictory(){
     push();
-    fill(0, 0, 0, 180);
+    fill(0, 0, 0, 200);
     noStroke();
     rect(0, 0, width, height);
     fill(255, 220, 120);
     textAlign(CENTER, CENTER);
     textSize(46);
-    text("VICTORY!", width/2, height/2 - 60);
+    text("VICTORY!", width/2, height/2 - 80);
     fill("white");
-    textSize(20);
-    text("Final score: " + score, width/2, height/2 - 10);
-    text("Best: " + highScore, width/2, height/2 + 18);
-    textSize(16);
-    text("Press R to play again", width/2, height/2 + 56);
+    textSize(18);
+    text("Final score: " + score, width/2, height/2 - 32);
+    text("Best: " + highScore, width/2, height/2 - 8);
+    drawEndScreenButtons();
     pop();
     textAlign(LEFT, BASELINE);
+}
+
+function drawEndScreenButtons(){
+    // Two stacked text-buttons. Hit boxes are mirrored in mousePressed
+    // (height/2 + 42..72 for restart, +78..110 for menu).
+    var cx = width / 2;
+    var restartY = height/2 + 56;
+    var menuY    = height/2 + 94;
+    var hoverR = (mouseY > height/2 + 42 && mouseY < height/2 + 72 &&
+                  mouseX > cx - 110 && mouseX < cx + 110);
+    var hoverM = (mouseY > height/2 + 78 && mouseY < height/2 + 110 &&
+                  mouseX > cx - 110 && mouseX < cx + 110);
+    textSize(18);
+    fill(hoverR ? "white" : 200);
+    text("[ R ]  Restart", cx, restartY);
+    fill(hoverM ? "white" : 200);
+    text("[ M ]  Return to Menu", cx, menuY);
 }
 
 function keyPressed(){
@@ -346,10 +361,50 @@ function keyPressed(){
             return;
         }
     }
-    if((gameState === "over" || gameState === "victory") &&
-       (key === 'r' || key === 'R')){
-        resetGame();
+    if((gameState === "over" || gameState === "victory")){
+        if(key === 'r' || key === 'R'){ resetGame(); return; }
+        if(key === 'm' || key === 'M'){ returnToMenu(); return; }
     }
+}
+
+// Hit-test "Return to Menu" / "Restart" text on game-over/victory overlays.
+// Buttons drawn in drawGameOver/drawVictory at fixed coords so the click
+// targets are predictable.
+function mousePressed(){
+    if(gameState !== "over" && gameState !== "victory") return;
+    var cx = width / 2;
+    // Restart band:  y in [height/2 + 44, height/2 + 70], x within ~120 of center
+    // Menu band:     y in [height/2 + 80, height/2 + 104]
+    if(mouseY > height/2 + 42 && mouseY < height/2 + 72 &&
+       mouseX > cx - 110 && mouseX < cx + 110){
+        resetGame();
+    } else if(mouseY > height/2 + 78 && mouseY < height/2 + 110 &&
+              mouseX > cx - 110 && mouseX < cx + 110){
+        returnToMenu();
+    }
+}
+
+function returnToMenu(){
+    // Same cleanup as resetGame but lands on the menu, not in level 1.
+    score = 0;
+    if(playerObj){
+        playerObj.healthP = 100;
+        playerObj.shieldUntil = 0;
+        playerObj.rapidUntil = 0;
+    }
+    if(player) player._planeNumber = undefined;
+    [enemiesGroup, enemiesRedGroup1, enemiesRedGroup2, enemiesGroupN,
+     enemiesFighterGroup, lasersGroup, enemyLasersGroup, powerUpsGroup]
+        .forEach(function(g){ if(g) g.removeSprites(); });
+    if(bossObj) bossObj.reset();
+    if(player)  player.visible = false;
+    if(player1) player1.visible = false;
+    if(main_Screen) main_Screen.visible = true;
+    // startGame / plane_Selection are intentionally invisible hot-spots
+    // painted on top of the main_Screen image -- don't toggle them visible.
+    if(levelObj){ levelObj.current = 0; levelObj.banner = null; }
+    frameC = 0;
+    gameState = "menu";
 }
 
 function drawMenuOverlay(){
