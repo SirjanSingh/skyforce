@@ -22,6 +22,17 @@ var shieldAnim, speedAnim, coinAnim;
 var bossObj;
 var highScore = 0;
 var hitOsc, hitEnv, boomOsc, boomEnv;
+
+// Phase 17: new enemy variant groups + per-variant spawn caps. Same
+// shape as eF for fighters -- the spawn caps were how the old design
+// gated per-level pacing; the new LEVELS table has its own per-wave
+// .spawned counter so these globals are mostly informational now.
+var enemiesDiverGroup, enemiesGunnerGroup, enemiesWeaverGroup;
+var eD = 0, eG = 0, eW = 0;
+
+// Progress save: which level the player has cleared. Level N is
+// unlocked if N <= maxLevelCompleted + 1, so a fresh save unlocks 1.
+var maxLevelCompleted = 0;
 var bullet1Img, bullet2Img, bullet3Img;
 var explode;
 var explosionAnim;
@@ -148,6 +159,9 @@ function setup(){
     enemiesRedGroup2    = new Group();
     enemiesGroupN       = new Group();
     enemiesFighterGroup = new Group();
+    enemiesDiverGroup   = new Group();
+    enemiesGunnerGroup  = new Group();
+    enemiesWeaverGroup  = new Group();
     lasersGroup         = new Group();
     enemyLasersGroup    = new Group();
     powerUpsGroup       = new Group();
@@ -164,6 +178,7 @@ function setup(){
     bossObj    = new Boss();
 
     highScore = loadHighScore();
+    maxLevelCompleted = loadMaxLevel();
     setupSfx();
 
     startGame = createSprite(251, 701);
@@ -185,9 +200,10 @@ function draw(){
     background("black");
     frameC += 1;
 
-    // Scrolling space background only while actually flying (menu /
-    // plane-select keep the painted main_Screen sprite art).
-    if(gameState === "play" || gameState === "over" || gameState === "victory"){
+    // Scrolling space background while flying or while picking a level
+    // (menu / plane-select keep the painted main_Screen sprite art).
+    if(gameState === "play" || gameState === "over" ||
+       gameState === "victory" || gameState === "levelSelect"){
         drawScrollingBg();
     }
 
@@ -210,6 +226,7 @@ function draw(){
 
     drawSprites();
     if(gameState === "menu") drawMenuOverlay();
+    if(gameState === "levelSelect") drawLevelSelect();
     drawHud();
     if(bossObj)  bossObj.drawHpBar();
     if(levelObj) levelObj.drawBanner();
@@ -365,16 +382,29 @@ function keyPressed(){
         if(key === 'r' || key === 'R'){ resetGame(); return; }
         if(key === 'm' || key === 'M'){ returnToMenu(); return; }
     }
+    if(gameState === "levelSelect" && (key === 'b' || key === 'B')){
+        returnToMenu();
+        return;
+    }
 }
 
 // Hit-test "Return to Menu" / "Restart" text on game-over/victory overlays.
 // Buttons drawn in drawGameOver/drawVictory at fixed coords so the click
 // targets are predictable.
 function mousePressed(){
+    if(gameState === "levelSelect"){
+        var nodes = getLevelSelectNodes();
+        for(var i = 0; i < nodes.length; i++){
+            var n = nodes[i];
+            if(n.unlocked && dist(mouseX, mouseY, n.x, n.y) < n.r){
+                startLevel(n.level);
+                return;
+            }
+        }
+        return;
+    }
     if(gameState !== "over" && gameState !== "victory") return;
     var cx = width / 2;
-    // Restart band:  y in [height/2 + 44, height/2 + 70], x within ~120 of center
-    // Menu band:     y in [height/2 + 80, height/2 + 104]
     if(mouseY > height/2 + 42 && mouseY < height/2 + 72 &&
        mouseX > cx - 110 && mouseX < cx + 110){
         resetGame();
@@ -382,6 +412,23 @@ function mousePressed(){
               mouseX > cx - 110 && mouseX < cx + 110){
         returnToMenu();
     }
+}
+
+function startLevel(n){
+    score = 0;
+    playerObj.healthP = 100;
+    playerObj.shieldUntil = 0;
+    playerObj.rapidUntil = 0;
+    player._planeNumber = undefined;
+    [enemiesGroup, enemiesRedGroup1, enemiesRedGroup2, enemiesGroupN,
+     enemiesFighterGroup, enemiesDiverGroup, enemiesGunnerGroup,
+     enemiesWeaverGroup, lasersGroup, enemyLasersGroup, powerUpsGroup]
+        .forEach(function(g){ g.removeSprites(); });
+    bossObj.reset();
+    fc3 = frameCount;
+    frameC = 0;
+    gameState = "play";
+    levelObj.start(n);
 }
 
 function returnToMenu(){
@@ -394,7 +441,8 @@ function returnToMenu(){
     }
     if(player) player._planeNumber = undefined;
     [enemiesGroup, enemiesRedGroup1, enemiesRedGroup2, enemiesGroupN,
-     enemiesFighterGroup, lasersGroup, enemyLasersGroup, powerUpsGroup]
+     enemiesFighterGroup, enemiesDiverGroup, enemiesGunnerGroup,
+     enemiesWeaverGroup, lasersGroup, enemyLasersGroup, powerUpsGroup]
         .forEach(function(g){ if(g) g.removeSprites(); });
     if(bossObj) bossObj.reset();
     if(player)  player.visible = false;
@@ -405,6 +453,96 @@ function returnToMenu(){
     if(levelObj){ levelObj.current = 0; levelObj.banner = null; }
     frameC = 0;
     gameState = "menu";
+}
+
+// ============================================================
+// Level-select map
+// Pure p5 primitives (circle nodes connected by lines), no new sprite
+// assets. Layout, hit-test and lock state all live in one helper so the
+// draw routine and the click handler can't drift out of sync.
+// ============================================================
+
+function getLevelSelectNodes(){
+    var n = LEVELS.length - 1;       // index 0 unused
+    var top = 130;
+    var spacing = (height - top - 80) / Math.max(1, n - 1);
+    var nodes = [];
+    for(var i = 1; i <= n; i++){
+        nodes.push({
+            level: i,
+            x: width / 2,
+            y: top + (i - 1) * spacing,
+            r: 30,
+            unlocked: i <= maxLevelCompleted + 1,
+        });
+    }
+    return nodes;
+}
+
+function drawLevelSelect(){
+    push();
+    fill(0, 0, 0, 130);     // dim the bg so nodes pop
+    noStroke();
+    rect(0, 0, width, height);
+
+    fill("white");
+    textAlign(CENTER, CENTER);
+    textSize(26);
+    text("SELECT LEVEL", width/2, 70);
+    textSize(12);
+    fill(200);
+    text("Progress: " + maxLevelCompleted + " / " + (LEVELS.length - 1) + " cleared",
+         width/2, 100);
+
+    var nodes = getLevelSelectNodes();
+
+    // Connector lines first so the nodes draw over them.
+    for(var i = 1; i < nodes.length; i++){
+        var prev = nodes[i - 1];
+        var cur  = nodes[i];
+        stroke(cur.unlocked ? 200 : 80);
+        strokeWeight(3);
+        line(prev.x, prev.y, cur.x, cur.y);
+    }
+
+    for(var i = 0; i < nodes.length; i++){
+        var n = nodes[i];
+        var hover = n.unlocked && dist(mouseX, mouseY, n.x, n.y) < n.r;
+        noStroke();
+        if(!n.unlocked){
+            fill(50);
+        } else if(hover){
+            fill(120, 220, 140);
+        } else if(n.level <= maxLevelCompleted){
+            fill(70, 150, 90);     // already-cleared
+        } else {
+            fill(80, 120, 200);    // current next unlocked
+        }
+        ellipse(n.x, n.y, n.r * 2, n.r * 2);
+        stroke(n.unlocked ? "white" : 110);
+        strokeWeight(2);
+        noFill();
+        ellipse(n.x, n.y, n.r * 2, n.r * 2);
+
+        noStroke();
+        fill(n.unlocked ? "white" : 130);
+        textSize(n.unlocked ? 22 : 18);
+        text(n.unlocked ? n.level : "X", n.x, n.y);
+
+        textSize(13);
+        fill(n.unlocked ? 230 : 100);
+        textAlign(LEFT, CENTER);
+        text(LEVELS[n.level].name + (LEVELS[n.level].boss ? "  [BOSS]" : ""),
+             n.x + n.r + 14, n.y);
+        textAlign(CENTER, CENTER);
+    }
+
+    textAlign(CENTER, BASELINE);
+    textSize(13);
+    fill(200);
+    text("[ B ]  Back to Menu", width/2, height - 30);
+    pop();
+    textAlign(LEFT, BASELINE);
 }
 
 function drawMenuOverlay(){
@@ -434,6 +572,16 @@ function drawPauseOverlay(){
     text("Press P to resume", width/2, height/2 + 30);
     pop();
     textAlign(LEFT, BASELINE);
+}
+
+function loadMaxLevel(){
+    try {
+        var n = parseInt(localStorage.getItem("skyforce_maxLevel") || "0", 10);
+        return isNaN(n) ? 0 : n;
+    } catch(e){ return 0; }
+}
+function saveMaxLevel(n){
+    try { localStorage.setItem("skyforce_maxLevel", String(n)); } catch(e){}
 }
 
 function loadHighScore(){
@@ -484,22 +632,8 @@ function playBoomSfx(){
 }
 
 function resetGame(){
-    score = 0;
-    playerObj.healthP = 100;
-    player._planeNumber = undefined;
-    enemiesGroup.removeSprites();
-    enemiesRedGroup1.removeSprites();
-    enemiesRedGroup2.removeSprites();
-    enemiesGroupN.removeSprites();
-    enemiesFighterGroup.removeSprites();
-    lasersGroup.removeSprites();
-    enemyLasersGroup.removeSprites();
-    powerUpsGroup.removeSprites();
-    playerObj.shieldUntil = 0;
-    playerObj.rapidUntil = 0;
-    bossObj.reset();
-    fc3 = frameCount;
-    frameC = 0;
-    gameState = "play";
-    levelObj.start(1);
+    // R on game-over restarts at level 1. R on victory does the same --
+    // the level-select map is the route if the player wants to skip
+    // ahead with their saved progress.
+    startLevel(1);
 }

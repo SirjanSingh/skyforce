@@ -13,26 +13,23 @@ class Player {
     }
      
     checkCollision(){
-        // Crashing into an enemy is *damage*, not a score event. The old
-        // code rewarded ramming with +100/+150 on top of -8 HP, which made
-        // sui-rushing strictly optimal early on. Now: HP drops, enemy
-        // dies, no points.
-        for(var i = 0; i < enemiesRedGroup1.length ; i++){
-            if(player.isTouching(enemiesRedGroup1[i])){
-                playerObj.health(8);
-                enemiesRedGroup1[i].destroy();
-            }
-        }
-        for(var i = 0; i < enemiesRedGroup2.length ; i++){
-            if(player.isTouching(enemiesRedGroup2[i])){
-                playerObj.health(8);
-                enemiesRedGroup2[i].destroy();
-            }
-        }
-        for(var i = 0; i < enemiesGroupN.length ; i++){
-            if(player.isTouching(enemiesGroupN[i])){
-                playerObj.health(8);
-                enemiesGroupN[i].destroy();
+        // One pass over enemiesGroup covers every enemy variant (red,
+        // fighter, N, diver, gunner, weaver, boss). Was originally three
+        // typed loops which had to be extended every time a new enemy
+        // type was added.
+        //
+        // Boss is special: it doesn't die on contact (would defeat the
+        // whole HP-bar fight) and the damage is higher because it's a
+        // big ship slamming the player.
+        for(var i = 0; i < enemiesGroup.length; i++){
+            var e = enemiesGroup[i];
+            if(player.isTouching(e)){
+                if(e._isBoss){
+                    playerObj.health(15);
+                } else {
+                    playerObj.health(8);
+                    e.destroy();
+                }
             }
         }
         // Enemy lasers now do real damage (was 4) so the fighter waves

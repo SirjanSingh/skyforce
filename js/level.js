@@ -9,10 +9,14 @@
 // counterZ < N) branches. The new shape collapses to one for-loop and
 // lets a future level be added by appending one object to LEVELS.
 
+// 5-level campaign. Boss moved to L5 so the new mid-game levels (3 + 4)
+// can introduce diver/gunner/weaver variants without the player ever
+// fighting a boss in their first sitting.
 var LEVELS = [
     null,
     {
         name: "Asteroid Belt",
+        tint: [10, 20, 60],        // dim blue
         waves: [
             { type: "red1",    every: 18, cap: 6, startFrame: 60  },
             { type: "red2",    every: 18, cap: 6, startFrame: 200 },
@@ -21,6 +25,7 @@ var LEVELS = [
     },
     {
         name: "Heavy Resistance",
+        tint: [40, 10, 70],        // dark purple
         waves: [
             { type: "red1",    every: 15, cap: 8, startFrame: 60  },
             { type: "red2",    every: 15, cap: 8, startFrame: 60  },
@@ -30,17 +35,43 @@ var LEVELS = [
         boss: false,
     },
     {
+        name: "Diving Squadron",
+        tint: [70, 20, 20],        // dark red
+        waves: [
+            { type: "red1",    every: 14, cap: 6,  startFrame: 60  },
+            { type: "diver",   every: 18, cap: 12, startFrame: 120 },
+            { type: "weaver",  every: 60, cap: 6,  startFrame: 240 },
+            { type: "fighter", every: 100,cap: 4,  startFrame: 360 },
+        ],
+        boss: false,
+    },
+    {
+        name: "Crossfire",
+        tint: [30, 50, 20],        // dark olive
+        waves: [
+            { type: "gunner",  every: 110, cap: 6, startFrame: 60  },
+            { type: "weaver",  every: 55,  cap: 8, startFrame: 180 },
+            { type: "diver",   every: 16,  cap: 10,startFrame: 280 },
+            { type: "fighter", every: 80,  cap: 6, startFrame: 360 },
+            { type: "N1",      every: 22,  cap: 4, startFrame: 480 },
+        ],
+        boss: false,
+    },
+    {
         name: "Final Push",
+        tint: [60, 10, 10],        // deep red, ominous
         waves: [
             { type: "red1",    every: 12, cap: 10, startFrame: 60  },
             { type: "red2",    every: 12, cap: 10, startFrame: 60  },
+            { type: "diver",   every: 18, cap: 8,  startFrame: 120 },
             { type: "fighter", every: 60, cap: 8,  startFrame: 240 },
+            { type: "gunner",  every: 130,cap: 4,  startFrame: 300 },
             { type: "N1",      every: 20, cap: 6,  startFrame: 180 },
             { type: "N2",      every: 22, cap: 6,  startFrame: 380 },
             { type: "N3",      every: 28, cap: 4,  startFrame: 560 },
             { type: "N4",      every: 28, cap: 4,  startFrame: 660 },
         ],
-        boss: true,   // Phase 14 will plug in actual boss spawning
+        boss: true,
     },
 ];
 
@@ -68,7 +99,8 @@ class Level {
         this.showBanner("Level " + n + ": " + def.name, 120);
         // Legacy spawn-cap globals — unused for gating now, but kept zero
         // so any debug overlay reading them stays sensible.
-        e1r = 0; e2r = 0; e3n1 = 0; e3n2 = 0; e3n3 = 0; e3n4 = 0; eF = 0;
+        e1r = 0; e2r = 0; e3n1 = 0; e3n2 = 0; e3n3 = 0; e3n4 = 0;
+        eF = 0; eD = 0; eG = 0; eW = 0;
     }
 
     showBanner(text, durFrames){
@@ -108,6 +140,8 @@ class Level {
         enemiesObj.rotateE12(0, 5, 1);
         enemiesObj.rotateE12(0, 5, 2);
         enemiesObj.updateFighters();
+        enemiesObj.updateGunners();
+        enemiesObj.updateWeavers();
 
         var fireEvery = playerObj.hasRapid() ? 2 : 4;
         if(frameC % fireEvery === 0){
@@ -148,10 +182,27 @@ class Level {
             case "N2":      enemiesObj.enemiesN1(440, 0, -2, 4, 2); break;
             case "N3":      enemiesObj.enemiesN1(60,  0,  0, 4, 3); break;
             case "N4":      enemiesObj.enemiesN1(440, 0,  0, 4, 4); break;
+            case "diver":
+                enemiesObj.enemiesDiver(random(40, width - 40));
+                break;
+            case "gunner":
+                // Spread across thirds so 3+ gunners don't pile up.
+                var lanes = [width * 0.25, width * 0.5, width * 0.75];
+                enemiesObj.enemiesGunner(lanes[w.spawned % 3]);
+                break;
+            case "weaver":
+                enemiesObj.enemiesWeaver(random(60, width - 60));
+                break;
         }
     }
 
     complete(){
+        // Save progress *before* advancing so the level select map
+        // reflects the just-cleared level even if the player bails.
+        if(this.current > maxLevelCompleted){
+            maxLevelCompleted = this.current;
+            saveMaxLevel(maxLevelCompleted);
+        }
         if(this.current >= LEVELS.length - 1){
             gameState = "victory";
             maybeRecordHighScore();

@@ -120,6 +120,88 @@ class Enemies {
         enemiesGroup.add(enemy);
     }
 
+    // Fast diver: descends in a straight line at high speed. 1 HP, low
+    // points (80) -- it's basically a hard-to-hit aerial nuisance.
+    enemiesDiver(x){
+        eD++;
+        var e = createSprite(x, -20, 50, 50);
+        e.addImage(enemyGreenImg);
+        e.velocityY = 7;
+        e.lifetime  = 200;
+        e.points = 80;
+        e.hp = 1;
+        e.setCollider("circle", 0, 0, 28);
+        enemiesDiverGroup.add(e);
+        enemiesGroup.add(e);
+    }
+
+    // Gunner: descends to a stop, fires 3 shots, then retreats. 2 HP,
+    // 220 points. Forces the player to make a window vs hovering.
+    enemiesGunner(x){
+        eG++;
+        var e = createSprite(x, -30, 60, 60);
+        e.addImage(enemyYellowImg);
+        e.velocityY = 2.5;
+        e.lifetime  = 800;
+        e.points = 220;
+        e.hp = 2;
+        e.setCollider("circle", 0, 0, 30);
+        e._gunnerPhase = "approach";
+        e._stopY = 120 + random(-20, 60);
+        e._shotsLeft = 3;
+        e._lastFire = 0;
+        enemiesGunnerGroup.add(e);
+        enemiesGroup.add(e);
+    }
+
+    updateGunners(){
+        for(var i = 0; i < enemiesGunnerGroup.length; i++){
+            var g = enemiesGunnerGroup.get(i);
+            if(g._gunnerPhase === "approach"){
+                if(g.y >= g._stopY){
+                    g.velocityY = 0;
+                    g._gunnerPhase = "fire";
+                    g._lastFire = frameCount;
+                }
+            } else if(g._gunnerPhase === "fire"){
+                if(frameCount - g._lastFire > 28){
+                    spawnEnemyLaser(g.x, g.y + 30);
+                    g._shotsLeft--;
+                    g._lastFire = frameCount;
+                    if(g._shotsLeft <= 0){
+                        g._gunnerPhase = "leave";
+                        g.velocityY = 3.5;
+                    }
+                }
+            }
+        }
+    }
+
+    // Weaver: cyan, sine-wave horizontal motion as it descends. 2 HP.
+    // Adds a moving target challenge without being lethal.
+    enemiesWeaver(x){
+        eW++;
+        var e = createSprite(x, -20, 50, 50);
+        e.addImage(enemyCyanImg);
+        e.scale = 1.2;
+        e.velocityY = 3;
+        e.lifetime  = 400;
+        e.points = 130;
+        e.hp = 2;
+        e.setCollider("circle", 0, 0, 28);
+        e._weaverBornAt = frameCount;
+        enemiesWeaverGroup.add(e);
+        enemiesGroup.add(e);
+    }
+
+    updateWeavers(){
+        for(var i = 0; i < enemiesWeaverGroup.length; i++){
+            var w = enemiesWeaverGroup.get(i);
+            var t = frameCount - w._weaverBornAt;
+            w.velocityX = 3.2 * Math.sin(t * 0.07);
+        }
+    }
+
     updateFighters(){
         // Each fighter checks its own cooldown. Firing always shoots straight
         // down; we don't lead the player because the lasers travel fast and

@@ -9,9 +9,11 @@ class Game {
 
         if(gameState === "menu"){
             if(mousePressedOver(startGame)){
-                gameState = "play";
-                fc3 = frameCount;
-                levelObj.start(1);
+                // Route into the level-select map instead of straight to
+                // level 1, so the player can pick any unlocked level.
+                gameState = "levelSelect";
+                main_Screen.visible = false;
+                fc2 = frameC; // re-arm any debounce that reads fc2
             }
             if(frameC > (fc2 + 50) || fc2 === undefined){
                 if(mousePressedOver(plane_Selection)){
