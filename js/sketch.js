@@ -142,6 +142,11 @@ function preload(){
 }
 
 function setup(){
+    // pixelDensity(1) before createCanvas: on retina / high-DPI displays
+    // p5 defaults to density 2, which quadruples the pixels pushed every
+    // frame. A 2D arcade game doesn't need that crispness; capping at 1
+    // is a large, free FPS win.
+    pixelDensity(1);
     createCanvas(500, displayHeight);
     angleMode(DEGREES);
 
@@ -252,24 +257,26 @@ function drawScrollingBg(){
     bgScrollY = (bgScrollY + 1.5) % drawH;
     var y = bgScrollY - drawH;
 
-    // Per-level color tint. Same space.jpg gets 5 different moods --
-    // dim blue / dark purple / dark red / dark olive / deep red --
-    // by lightening the LEVELS[current].tint and using p5's tint().
-    // Falls back to a soft neutral wash on menu / select / pre-level.
-    var t = (levelObj && levelObj.current && LEVELS[levelObj.current])
-            ? LEVELS[levelObj.current].tint
-            : [180, 180, 200];
-    push();
-    // Brighten the source tint a bit so the bg isn't murky.
-    tint(Math.min(255, t[0] + 130),
-         Math.min(255, t[1] + 130),
-         Math.min(255, t[2] + 130));
+    // Draw the bg plain (scaled + tiled). NEVER tint() here -- tint
+    // regenerates a recoloured copy of the image every frame and, tiled
+    // across a tall canvas, dropped FPS to single digits. The per-level
+    // mood is instead a single translucent coloured rect overlaid on top:
+    // one cheap fill, same visual effect.
     while(y < height){
         image(spaceBgImg, 0, y, drawW, drawH);
         y += drawH;
     }
-    pop();
-    noTint();
+
+    var t = (levelObj && levelObj.current && LEVELS[levelObj.current])
+            ? LEVELS[levelObj.current].tint
+            : null;
+    if(t){
+        push();
+        noStroke();
+        fill(t[0], t[1], t[2], 90);
+        rect(0, 0, width, height);
+        pop();
+    }
 }
 
 function drawHud(){
